@@ -1873,6 +1873,165 @@ function loseLife() {
 /* ============================================================
    ATUALIZAÇÃO (passo fixo)
    ============================================================ */
+
+/* Um passo de movimento do jogador — núcleo ÚNICO para os modos plataforma,
+   interlúdio e arena (antes, cada um tinha sua cópia, e as cópias já tinham
+   divergido: squash de aterrissagem, cooldown do dash, animação de passada
+   ausente no interlúdio). Regras comuns: dash, mergulho, pulo duplo com
+   coyote/buffer, gravidade, planar com a Pena e integração X/Y contra o
+   ambiente.
+
+   env = {
+     solids:     null | retângulos   // plataforma/interlúdio: sólidos + movers
+     floorY:     null | número       // arena: chão infinito (sem sólidos)
+     minX, maxX                      // limites horizontais: [minX, maxX - player.w]
+     dashCd:     30 (plataforma) | 45 (arena/esquiva)
+     dashInvuln: true na arena       // esquiva concede i-frames
+     dashGate:   true na arena       // dash exige attackT === 0
+     dashPuff:   true na plataforma  // partículas visuais do dash
+   }
+   Retorna { prevVy, wasPounding, prevFeet } para o chamador aplicar os
+   efeitos de pouso/contato específicos de cada modo. */
+function stepPlayer(env) {
+  const moveSpeed = player.speedBoostT > 0 ? MOVE_SPEED * 1.6 : MOVE_SPEED;
+  player.vx = 0;
+  if (keys.left  || pad.left  || touch.left)  { player.vx = -moveSpeed; player.facing = -1; }
+  if (keys.right || pad.right || touch.right) { player.vx =  moveSpeed; player.facing =  1; }
+  player.moving = player.vx !== 0 && !player.pounding;
+
+  // --- Dash (investida horizontal / esquiva na arena) ---
+  if (player.dashCooldown > 0) player.dashCooldown--;
+  if (dashPressed && player.dashCooldown === 0 && player.dashT === 0 && !player.pounding
+      && !(env.dashGate && player.attackT > 0)) {
+    player.dashDir = player.facing;
+    player.dashT = DASH_FRAMES;
+    player.dashCooldown = env.dashCd;
+    if (env.dashInvuln) player.invuln = Math.max(player.invuln, DASH_FRAMES);
+    Sound.dash();
+    if (env.dashPuff) spawnParticles(player.x + player.w / 2 - player.dashDir * player.w * 0.4, player.y + player.h - 8, 6, "#ffffff", { speed: 2, life: 12, r: 2 });
+  }
+  if (player.dashT > 0) {
+    player.dashT--;
+    player.vx = player.dashDir * DASH_SPEED;
+    player.moving = true;
+  }
+
+  // --- Ground pound: ↓ no ar dispara um mergulho rápido ---
+  if (downPressed && !player.onGround && !player.pounding) {
+    player.pounding = true;
+    player.dashT = 0;
+    player.vy = GROUND_POUND_SPEED;
+    Sound.groundPound();
+  }
+  if (player.pounding) { player.vx = 0; player.moving = false; }
+
+  // --- Pulo (coyote time + pulo duplo + input buffer) ---
+  if (player.onGround) { player.coyote = 6; player.jumps = 0; }
+  else if (player.coyote > 0) player.coyote--;
+  if (jumpPressed) player.jumpBuffer = 8;
+  else if (player.jumpBuffer > 0) player.jumpBuffer--;
+  if (player.jumpBuffer > 0) {
+    const jumpVel = FORM[player.form].jump;
+    if (player.coyote > 0) {
+      player.vy = jumpVel;
+      player.onGround = false;
+      player.coyote = 0;
+      player.jumps = 1;
+      player.jumpBuffer = 0;
+      Sound.jump();
+    } else if (jumpPressed && player.jumps < 2) {
+      player.vy = jumpVel * 0.92;
+      player.jumps = 2;
+      player.jumpBuffer = 0;
+      Sound.doubleJump();
+    }
+  }
+  jumpPressed = false;
+
+  // --- Animação das patinhas (só andando no chão) ---
+  if (player.moving && player.onGround) player.walkPhase += 0.35;
+  else player.walkPhase = 0;
+
+  // --- Gravidade (sem limite durante o mergulho) ---
+  player.vy += GRAVITY;
+  if (!player.pounding && player.vy > MAX_FALL) player.vy = MAX_FALL;
+
+  // --- Planar com a Pena: segurar pular no ar freia a queda ---
+  if (player.hasFeather && !player.onGround && !player.pounding && player.vy > 1.5 && (keys.jump || pad.jump || touch.jump)) {
+    player.vy = 1.5;
+  }
+
+  // --- Colisão eixo X ---
+  player.x += player.vx;
+  if (env.solids) {
+    for (const s of env.solids) {
+      if (aabb(player, s)) {
+        if (player.vx > 0) player.x = s.x - player.w;
+        else if (player.vx < 0) player.x = s.x + s.w;
+      }
+    }
+  }
+  if (player.x < env.minX) player.x = env.minX;
+  if (player.x + player.w > env.maxX) player.x = env.maxX - player.w;
+
+  // --- Colisão eixo Y ---
+  const prevVy = player.vy;
+  const wasPounding = player.pounding;
+  const prevFeet = player.y + player.h;
+  player.onGround = false;
+  player.y += player.vy;
+  if (env.floorY != null) {
+    if (player.y + player.h >= env.floorY) {
+      player.y = env.floorY - player.h;
+      player.vy = 0;
+      player.onGround = true;
+    }
+  } else {
+    for (const s of env.solids) {
+      if (aabb(player, s)) {
+        if (player.vy > 0) {
+          player.y = s.y - player.h;
+          player.vy = 0;
+          player.onGround = true;
+          if (s.axis) player.x += s.dx;
+        } else if (player.vy < 0) {
+          player.y = s.y + s.h;
+          player.vy = 0;
+        }
+      }
+    }
+  }
+  return { prevVy, wasPounding, prevFeet };
+}
+
+/* Pouso de um mergulho na plataforma/interlúdio: impacto visual/sonoro + dano
+   em área nos inimigos do mesmo andar. Unificado com o filtro sameFloor — o
+   interlúdio não tinha o filtro e podia acertar inimigos no chão a partir de
+   uma plataforma alta, só pela distância horizontal. */
+function poundLandingAOE() {
+  player.pounding = false;
+  player.landingSquashT = 10;
+  addShake(8);
+  hitFreeze = Math.max(hitFreeze, 4);
+  Sound.poundLand();
+  spawnParticles(player.x + player.w / 2, player.y + player.h, 12, "#c9a35a", { speed: 5, life: 20, r: 4 });
+  for (const en of enemies) {
+    const sameFloor = Math.abs((en.y + en.h) - (player.y + player.h)) < 30;
+    const shadowOpen = !["sentinela", "eco", "espreita"].includes(en.type) || shadowEnemyVulnerable(en);
+    if (!en.dead && shadowOpen && sameFloor && Math.abs((en.x + en.w / 2) - (player.x + player.w / 2)) < POUND_AOE_RADIUS) {
+      damageEnemy(en, 2);
+      Sound.stomp();
+      spawnParticles(en.x + en.w / 2, en.y + en.h / 2, 6, "#ffd54d", { speed: 3, life: 14, r: 3 });
+      if (en.type === "miniboss" && en.dead) {
+        coinsTotal += 5; coinsForLife += 5;
+        addShake(10);
+        spawnParticles(en.x + en.w / 2, en.y + en.h / 2, 18, "#ffd54d", { speed: 6, life: 22, r: 5 });
+      }
+    }
+  }
+  enemies = enemies.filter((e) => !e.dead);
+}
+
 function updatePlaying() {
   const lv = currentLevel();
   if (levelFinishing) return;
@@ -1909,128 +2068,20 @@ function updatePlaying() {
     player.pendingRevert = false;
   }
 
-  // --- Jogador: movimento horizontal (teclado OU controle) ---
-  const moveSpeed = player.speedBoostT > 0 ? MOVE_SPEED * 1.6 : MOVE_SPEED;
-  player.vx = 0;
-  if (keys.left  || pad.left  || touch.left)  { player.vx = -moveSpeed; player.facing = -1; }
-  if (keys.right || pad.right || touch.right) { player.vx =  moveSpeed; player.facing =  1; }
-  player.moving = player.vx !== 0 && !player.pounding;
-
-  // --- Dash: investida horizontal breve (tecla X/Shift ou botão X) ---
-  if (player.dashCooldown > 0) player.dashCooldown--;
-  if (dashPressed && player.dashCooldown === 0 && player.dashT === 0 && !player.pounding) {
-    player.dashDir = player.facing;
-    player.dashT = DASH_FRAMES;
-    player.dashCooldown = DASH_COOLDOWN;
-    Sound.dash();
-    spawnParticles(player.x + player.w / 2 - player.dashDir * player.w * 0.4, player.y + player.h - 8, 6, "#ffffff", { speed: 2, life: 12, r: 2 });
-  }
-  if (player.dashT > 0) {
-    player.dashT--;
-    player.vx = player.dashDir * DASH_SPEED;
-    player.moving = true;
-  }
-
-  // --- Ground pound: pressionar ↓ no ar dispara um mergulho rápido ---
-  if (downPressed && !player.onGround && !player.pounding) {
-    player.pounding = true;
-    player.dashT = 0;
-    player.vy = GROUND_POUND_SPEED;
-    Sound.groundPound();
-  }
-  if (player.pounding) { player.vx = 0; player.moving = false; }
-
-  // --- Pulo (com coyote time + pulo duplo + input buffer) ---
-  if (player.onGround) { player.coyote = 6; player.jumps = 0; }
-  else if (player.coyote > 0) player.coyote--;
-  if (jumpPressed) player.jumpBuffer = 8;
-  else if (player.jumpBuffer > 0) player.jumpBuffer--;
-  if (player.jumpBuffer > 0) {
-    const jumpVel = FORM[player.form].jump;
-    if (player.coyote > 0) {
-      player.vy = jumpVel;
-      player.onGround = false;
-      player.coyote = 0;
-      player.jumps = 1;
-      player.jumpBuffer = 0;
-      Sound.jump();
-    } else if (jumpPressed && player.jumps < 2) {
-      player.vy = jumpVel * 0.92;
-      player.jumps = 2;
-      player.jumpBuffer = 0;
-      Sound.doubleJump();
-    }
-  }
-  jumpPressed = false;
-
-  // --- Fase da animação das patinhas (só andando no chão) ---
-  if (player.moving && player.onGround) player.walkPhase += 0.35;
-  else player.walkPhase = 0;
-
-  // --- Gravidade ---
-  player.vy += GRAVITY;
-  if (!player.pounding && player.vy > MAX_FALL) player.vy = MAX_FALL;
-
-  // --- Planar com a Pena: segurar pular no ar freia bastante a queda ---
-  if (player.hasFeather && !player.onGround && !player.pounding && player.vy > 1.5 && (keys.jump || pad.jump || touch.jump)) {
-    player.vy = 1.5;
-  }
-
-  // --- Colisão eixo X ---
-  player.x += player.vx;
-  for (const s of lv.solids.concat(movers)) {
-    if (aabb(player, s)) {
-      if (player.vx > 0) player.x = s.x - player.w;
-      else if (player.vx < 0) player.x = s.x + s.w;
-    }
-  }
-  if (player.x < 0) player.x = 0;
-  if (player.x + player.w > lv.worldW) player.x = lv.worldW - player.w;
-
-  // --- Colisão eixo Y ---
-  const prevVy = player.vy;
-  player.onGround = false;
-  const wasPounding = player.pounding;
-  player.y += player.vy;
-  for (const s of lv.solids.concat(movers)) {
-    if (aabb(player, s)) {
-      if (player.vy > 0) {
-        player.y = s.y - player.h;
-        player.vy = 0;
-        player.onGround = true;
-        if (s.axis) player.x += s.dx;
-        if (!wasPounding && prevVy > 6 && player.landingSquashT === 0) player.landingSquashT = 5;
-      } else if (player.vy < 0) {
-        player.y = s.y + s.h;
-        player.vy = 0;
-      }
-    }
-  }
+  // --- Jogador: um passo de movimento (núcleo único; ver stepPlayer) ---
+  const step = stepPlayer({
+    solids: lv.solids.concat(movers),
+    minX: 0,
+    maxX: lv.worldW,
+    dashCd: DASH_COOLDOWN,
+    dashPuff: true,
+  });
+  const prevVy = step.prevVy;
+  const wasPounding = step.wasPounding;
+  if (!wasPounding && prevVy > 6 && player.onGround && player.landingSquashT === 0) player.landingSquashT = 5;
 
   // --- Pouso do ground pound: impacto visual/sonoro + derruba inimigos por perto ---
-  if (wasPounding && player.onGround) {
-    player.pounding = false;
-    player.landingSquashT = 10;
-    addShake(8);
-    hitFreeze = Math.max(hitFreeze, 4);
-    Sound.poundLand();
-    spawnParticles(player.x + player.w / 2, player.y + player.h, 12, "#c9a35a", { speed: 5, life: 20, r: 4 });
-    for (const en of enemies) {
-      const sameFloor = Math.abs((en.y + en.h) - (player.y + player.h)) < 30;
-      const shadowOpen = !["sentinela", "eco", "espreita"].includes(en.type) || shadowEnemyVulnerable(en);
-      if (!en.dead && shadowOpen && sameFloor && Math.abs((en.x + en.w / 2) - (player.x + player.w / 2)) < POUND_AOE_RADIUS) {
-        damageEnemy(en, 2);
-        Sound.stomp();
-        spawnParticles(en.x + en.w / 2, en.y + en.h / 2, 6, "#ffd54d", { speed: 3, life: 14, r: 3 });
-        if (en.type === "miniboss" && en.dead) {
-          coinsTotal += 5; coinsForLife += 5;
-          addShake(10);
-          spawnParticles(en.x + en.w / 2, en.y + en.h / 2, 18, "#ffd54d", { speed: 6, life: 22, r: 5 });
-        }
-      }
-    }
-    enemies = enemies.filter((e) => !e.dead);
-  }
+  if (wasPounding && player.onGround) poundLandingAOE();
 
   // --- Caiu no buraco ---
   if (player.y > H + 80) {
@@ -2248,57 +2299,18 @@ function updateInterlude() {
   for (const point of exchangePoints) if (point.cooldown > 0) point.cooldown--;
   if (player.invuln > 0) player.invuln--;
 
-  player.vx = 0;
-  const moveSpeed = player.speedBoostT > 0 ? MOVE_SPEED * 1.6 : MOVE_SPEED;
-  if (keys.left || pad.left || touch.left) { player.vx = -moveSpeed; player.facing = -1; }
-  if (keys.right || pad.right || touch.right) { player.vx = moveSpeed; player.facing = 1; }
-  player.moving = player.vx !== 0 && !player.pounding;
-  if (player.dashCooldown > 0) player.dashCooldown--;
-  if (dashPressed && player.dashCooldown === 0 && player.dashT === 0 && !player.pounding) {
-    player.dashDir = player.facing; player.dashT = DASH_FRAMES; player.dashCooldown = DASH_COOLDOWN;
-    Sound.dash();
-  }
-  if (player.dashT > 0) { player.dashT--; player.vx = player.dashDir * DASH_SPEED; }
-  if (downPressed && !player.onGround && !player.pounding) {
-    player.pounding = true; player.dashT = 0; player.vy = GROUND_POUND_SPEED; Sound.groundPound();
-  }
-  if (player.pounding) { player.vx = 0; player.moving = false; }
-
-  if (player.onGround) { player.coyote = 6; player.jumps = 0; }
-  else if (player.coyote > 0) player.coyote--;
-  if (jumpPressed) player.jumpBuffer = 8;
-  else if (player.jumpBuffer > 0) player.jumpBuffer--;
-  if (player.jumpBuffer > 0) {
-    const jumpVel = FORM[player.form].jump;
-    if (player.coyote > 0) { player.vy = jumpVel; player.onGround = false; player.coyote = 0; player.jumps = 1; player.jumpBuffer = 0; Sound.jump(); }
-    else if (jumpPressed && player.jumps < 2) { player.vy = jumpVel * 0.92; player.jumps = 2; player.jumpBuffer = 0; Sound.doubleJump(); }
-  }
-  jumpPressed = false;
-  player.vy += GRAVITY;
-  if (!player.pounding && player.vy > MAX_FALL) player.vy = MAX_FALL;
-  if (player.hasFeather && !player.onGround && !player.pounding && player.vy > 1.5 && (keys.jump || pad.jump || touch.jump)) player.vy = 1.5;
-
-  player.x += player.vx;
-  for (const s of lv.solids.concat(movers)) if (aabb(player, s)) {
-    if (player.vx > 0) player.x = s.x - player.w;
-    else if (player.vx < 0) player.x = s.x + s.w;
-  }
-  player.x = Math.max(0, Math.min(player.x, lv.worldW - player.w));
-  const previousFeet = player.y + player.h;
-  const prevVy = player.vy;
-  const wasPounding = player.pounding;
-  player.onGround = false;
-  player.y += player.vy;
-  for (const s of lv.solids.concat(movers)) if (aabb(player, s)) {
-    if (player.vy > 0) { player.y = s.y - player.h; player.vy = 0; player.onGround = true; if (s.axis) player.x += s.dx; }
-    else if (player.vy < 0) { player.y = s.y + s.h; player.vy = 0; }
-  }
-  if (wasPounding && player.onGround) {
-    player.pounding = false; player.landingSquashT = 10; addShake(7); Sound.poundLand();
-    for (const en of enemies) {
-      if (!en.dead && shadowEnemyVulnerable(en) && Math.abs((en.x + en.w / 2) - (player.x + player.w / 2)) < POUND_AOE_RADIUS) damageEnemy(en, 2);
-    }
-  }
+  // --- Jogador: um passo de movimento (núcleo único; ver stepPlayer) ---
+  const step = stepPlayer({
+    solids: lv.solids.concat(movers),
+    minX: 0,
+    maxX: lv.worldW,
+    dashCd: DASH_COOLDOWN,
+  });
+  const previousFeet = step.prevFeet;
+  const prevVy = step.prevVy;
+  const wasPounding = step.wasPounding;
+  if (!wasPounding && prevVy > 6 && player.onGround && player.landingSquashT === 0) player.landingSquashT = 5;
+  if (wasPounding && player.onGround) poundLandingAOE();
   if (player.y > H + 80) { loseLife(); return; }
 
   const pCenter = player.x + player.w / 2;
@@ -2449,23 +2461,20 @@ function updateFight() {
   if (hitFreeze > 0) { hitFreeze--; return; } // congelamento curto de impacto (feedback de golpe forte)
 
   // --- Movimento do jogador (sem scroll; paredes do ringue em 40..W-40) ---
-  player.vx = 0;
-  if (keys.left || pad.left || touch.left) { player.vx = -MOVE_SPEED; player.facing = -1; }
-  if (keys.right || pad.right || touch.right) { player.vx = MOVE_SPEED; player.facing = 1; }
-  player.moving = player.vx !== 0 && !player.pounding;
-
-  if (player.dashCooldown > 0) player.dashCooldown--;
-  if (dashPressed && player.dashCooldown === 0 && player.attackT === 0 && !player.pounding) {
-    player.dashDir = player.facing;
-    player.dashT = DASH_FRAMES;
-    player.dashCooldown = 45;
-    player.invuln = Math.max(player.invuln, DASH_FRAMES);
-    Sound.dash();
-  }
-  if (player.dashT > 0) {
-    player.dashT--;
-    player.vx = player.dashDir * DASH_SPEED;
-  }
+  // Núcleo único de movimento (ver stepPlayer): a arena troca sólidos pelo chão
+  // do ringue e configura o dash como esquiva (recarga maior, i-frames,
+  // bloqueada durante ataques). O processamento de ataques roda em seguida para
+  // preservar a ordem original (dash usa o attackT do passo anterior).
+  const step = stepPlayer({
+    floorY: GROUND_Y,
+    minX: 40,
+    maxX: W - 40,
+    dashCd: 45,
+    dashInvuln: true,
+    dashGate: true,
+  });
+  const wasPoundingFight = step.wasPounding;
+  const previousFeet = step.prevFeet;
   // Soco rápido; chute de maior alcance/dano, com recuperação mais lenta.
 
   if (player.attackT > 0) {
@@ -2501,44 +2510,8 @@ function updateFight() {
     spawnParticles(player.x + player.w / 2 + player.facing * 30, player.y + player.h * 0.5, 4, "#ffffff", { speed: 2, life: 8, r: 2 });
   }
 
-  // --- Ground pound: também serve de golpe extra contra o boxeador ---
-  if (downPressed && !player.onGround && !player.pounding) {
-    player.pounding = true;
-    player.dashT = 0;
-    player.vy = GROUND_POUND_SPEED;
-    Sound.groundPound();
-  }
-  if (player.pounding) { player.vx = 0; player.moving = false; }
-
-  if (player.onGround) { player.coyote = 6; player.jumps = 0; }
-  else if (player.coyote > 0) player.coyote--;
-  if (jumpPressed) player.jumpBuffer = 8;
-  else if (player.jumpBuffer > 0) player.jumpBuffer--;
-  if (player.jumpBuffer > 0) {
-    const jumpVel = FORM[player.form].jump;
-    if (player.coyote > 0) { player.vy = jumpVel; player.onGround = false; player.coyote = 0; player.jumps = 1; player.jumpBuffer = 0; Sound.jump(); }
-    else if (jumpPressed && player.jumps < 2) { player.vy = jumpVel * 0.92; player.jumps = 2; player.jumpBuffer = 0; Sound.doubleJump(); }
-  }
-  jumpPressed = false;
-
-  if (player.moving && player.onGround) player.walkPhase += 0.35; else player.walkPhase = 0;
-
-  player.vy += GRAVITY;
-  if (!player.pounding && player.vy > MAX_FALL) player.vy = MAX_FALL;
-
-  player.x += player.vx;
-  if (player.x < 40) player.x = 40;
-  if (player.x + player.w > W - 40) player.x = W - 40 - player.w;
-
-  player.onGround = false;
-  const wasPoundingFight = player.pounding;
-  const previousFeet = player.y + player.h;
-  player.y += player.vy;
-  if (player.y + player.h >= GROUND_Y) {
-    player.y = GROUND_Y - player.h;
-    player.vy = 0;
-    player.onGround = true;
-  }
+  // --- Pouso do mergulho na arena (sem dano em área: a cabeça do boxeador tem
+  // tratamento próprio lá embaixo) ---
   if (wasPoundingFight && player.onGround) {
     player.pounding = false;
     player.landingSquashT = 10;
