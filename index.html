@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#101b2a">
   <title>Betinho — O caminho de casa</title>
-  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
   <main id="game-wrap">
     <div id="stage">
       <canvas id="game" width="960" height="540" tabindex="0" aria-label="Betinho — O caminho de casa. Cartões narrativos podem ser confirmados com Enter, Espaço ou A/B. Setas movem, Espaço pula e P pausa."></canvas>
       <button id="fullscreen-toggle" type="button" aria-label="Entrar em tela cheia" title="Tela cheia">⛶</button>
-      <div id="touch-controls" aria-label="Controles de toque">
+      <div id="touch-controls" data-direction-position="left-bottom" data-action-position="right-bottom" aria-label="Controles de toque">
         <div class="touch-directions" aria-label="Direção">
           <button type="button" data-touch-action="left" aria-label="Mover para a esquerda">◀</button>
           <button type="button" data-touch-action="down" aria-label="Baixar ou mergulhar">▼</button>
@@ -65,6 +65,6 @@
     <p id="hint">← → mover · Espaço / ↑ pular duas vezes · X / Shift dash · ↓ mergulho · P / Esc pausa · pontos TROCA alternam o Líder</p>
   </main>
   <script src="game.js?v=7"></script>
-  <script src="ui.js?v=7"></script>
+  <script src="ui.js?v=8"></script>
 </body>
 </html>

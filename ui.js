@@ -2,6 +2,9 @@
 
 const stage = document.getElementById("stage");
 const fullscreenButton = document.getElementById("fullscreen-toggle");
+const touchControls = document.getElementById("touch-controls");
+const touchDirections = touchControls?.querySelector(".touch-directions");
+const touchActions = touchControls?.querySelector(".touch-actions");
 const pausePanel = document.getElementById("pause-panel");
 const pauseButtons = [...document.querySelectorAll("[data-pause-action]")];
 const pauseMain = document.getElementById("pause-main");
@@ -36,6 +39,54 @@ document.addEventListener("fullscreenchange", syncFullscreenButton);
 document.addEventListener("webkitfullscreenchange", syncFullscreenButton);
 syncFullscreenButton();
 
+let touchLayoutFrame = 0;
+let touchLayoutKey = "";
+function overlaps(a, b) {
+  return Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left))
+    * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+}
+function touchCharacters(stageRect, scaleX, scaleY) {
+  const inFight = currentLevel().type === "fight";
+  const entities = inFight ? [player] : [player, companion];
+  if (inFight && fight?.boss) entities.push(fight.boss);
+  return entities.filter(Boolean).map(entity => ({
+    left: stageRect.left + (entity.x - (inFight ? 0 : cameraX)) * scaleX - 18,
+    top: stageRect.top + (entity.y - 28) * scaleY,
+    right: stageRect.left + (entity.x + entity.w - (inFight ? 0 : cameraX)) * scaleX + 18,
+    bottom: stageRect.top + (entity.y + entity.h + 18) * scaleY,
+  }));
+}
+function chooseTouchPosition(element, attribute, candidates, characters) {
+  if (!element) return;
+  let best = candidates[0];
+  let bestScore = Infinity;
+  for (const candidate of candidates) {
+    touchControls.dataset[attribute] = candidate;
+    const rect = element.getBoundingClientRect();
+    const score = characters.reduce((total, character) => total + overlaps(rect, character), 0);
+    if (score < bestScore) { best = candidate; bestScore = score; }
+    if (score === 0) break;
+  }
+  touchControls.dataset[attribute] = best;
+}
+function updateTouchLayout() {
+  if (!touchControls || !touchDirections || !touchActions || !touchControls.getBoundingClientRect) return;
+  if (++touchLayoutFrame % 6 !== 0 && touchLayoutKey) return;
+  const controlsRect = touchControls.getBoundingClientRect();
+  if (!controlsRect.width) return;
+  const stageRect = stage.getBoundingClientRect();
+  if (!stageRect.width || !stageRect.height || !player) return;
+  const scaleX = stageRect.width / W;
+  const scaleY = stageRect.height / H;
+  const key = [Math.round((player.x - cameraX) / 24), Math.round(player.y / 24),
+    Math.round(stageRect.width), Math.round(stageRect.height), currentLevel().type].join("|");
+  if (key === touchLayoutKey) return;
+  touchLayoutKey = key;
+  const characters = touchCharacters(stageRect, scaleX, scaleY);
+  chooseTouchPosition(touchDirections, "directionPosition", ["left-bottom", "left-top"], characters);
+  chooseTouchPosition(touchActions, "actionPosition", ["right-bottom", "right-top"], characters);
+}
+
 pauseButtons.forEach((button, index) => {
   button.addEventListener("click", () => { pauseFocus = index; pauseAction(index); syncGameUI(); });
   button.addEventListener("focus", () => { pauseFocus = index; });
@@ -62,8 +113,8 @@ pausePanel.addEventListener("keyup", e => {
 
 function syncGameUI() {
   const open = state === STATE.PAUSED;
-  const touchControls = document.getElementById("touch-controls");
   if (touchControls) touchControls.dataset.fight = String(currentLevel().type === "fight");
+  updateTouchLayout();
   const signature = [open, pauseFocus, pauseConfirm, pauseAccept, Sound.muted,
     assist.infiniteLives, assist.noFallDeath, levelIndex, bonusActive, currentLevel().type,
     interlude && interlude.clueIndex].join("|");

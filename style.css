@@ -13,6 +13,10 @@ body { background: radial-gradient(circle at 50% -10%, #254858 0, #0e2633 34%, v
 .touch-directions, .touch-actions { position: absolute; bottom: clamp(12px, 3vw, 28px); display: flex; gap: 8px; pointer-events: auto; }
 .touch-directions { left: clamp(12px, 3vw, 28px); }
 .touch-actions { right: clamp(12px, 3vw, 28px); flex-wrap: wrap; justify-content: flex-end; width: min(44%, 250px); }
+#touch-controls[data-direction-position="left-top"] .touch-directions { top: clamp(72px, 10vw, 92px); bottom: auto; }
+#touch-controls[data-direction-position="left-bottom"] .touch-directions { top: auto; bottom: clamp(12px, 3vw, 28px); }
+#touch-controls[data-action-position="right-top"] .touch-actions { top: clamp(72px, 10vw, 92px); bottom: auto; }
+#touch-controls[data-action-position="right-bottom"] .touch-actions { top: auto; bottom: clamp(12px, 3vw, 28px); }
 #touch-controls button { width: clamp(52px, 8vw, 72px); min-height: 52px; padding: 8px; border: 2px solid #fff3d699; border-radius: 50%; background: #102433cc; color: var(--paper); font-size: clamp(18px, 3vw, 28px); font-weight: bold; text-align: center; opacity: .9; -webkit-user-select: none; user-select: none; touch-action: none; }
 #touch-controls button:active, #touch-controls button.is-held { background: var(--gold); color: var(--ink); transform: scale(.94); }
 #touch-controls .touch-pause { position: absolute; top: 12px; right: 12px; width: 48px; min-height: 48px; font-size: 20px; pointer-events: auto; }
