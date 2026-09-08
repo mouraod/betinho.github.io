@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101b2a">
+  <title>Betinho — O caminho de casa</title>
+  <link rel="stylesheet" href="style.css?v=6">
+</head>
+<body>
+  <main id="game-wrap">
+    <div id="stage">
+      <canvas id="game" width="960" height="540" tabindex="0" aria-label="Betinho — O caminho de casa. Cartões narrativos podem ser confirmados com Enter, Espaço ou A/B. Setas movem, Espaço pula e P pausa."></canvas>
+      <section id="pause-panel" role="dialog" aria-modal="true" aria-labelledby="pause-heading" hidden>
+        <div id="pause-main" class="pause-layout">
+          <div class="pause-actions">
+            <p class="eyebrow">Um respiro no caminho</p>
+            <h1 id="pause-heading">Pausa</h1>
+            <p id="pause-stage"></p>
+            <h2 id="pause-title"></h2>
+            <p id="pause-story"></p>
+            <nav aria-label="Opções da pausa">
+              <button data-pause-action="0" class="primary">Continuar a viagem <span>Esc</span></button>
+              <button data-pause-action="1">Recomeçar esta Etapa</button>
+              <button data-pause-action="2">Som: ligado</button>
+              <button data-pause-action="3">Vidas infinitas: não</button>
+              <button data-pause-action="4">Proteção contra quedas: não</button>
+              <button data-pause-action="5" class="quiet">Voltar ao título</button>
+            </nav>
+          </div>
+          <aside class="field-guide">
+            <h2>Seu repertório</h2>
+            <p class="guide-key">Teclado · Controle Xbox</p>
+            <ul id="move-guide"></ul>
+            <p id="pause-tip" class="tip"></p>
+            <p class="menu-help">↑ ↓ ou Tab para escolher<br>Enter / A para confirmar · P / Esc / Start para voltar</p>
+          </aside>
+        </div>
+        <div id="pause-confirmation" hidden>
+          <p class="eyebrow">Antes de seguir</p>
+          <h2 id="confirm-title"></h2>
+          <p id="confirm-description"></p>
+          <div class="confirmation-actions">
+            <button id="pause-cancel" class="primary">Cancelar</button>
+            <button id="pause-accept">Confirmar</button>
+          </div>
+        </div>
+      </section>
+    </div>
+    <p id="hint">← → mover · Espaço / ↑ pular duas vezes · X / Shift dash · ↓ mergulho · P / Esc pausa · pontos TROCA alternam o Líder</p>
+  </main>
+  <script src="game.js?v=6"></script>
+  <script src="ui.js?v=6"></script>
+</body>
+</html>
