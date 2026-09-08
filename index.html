@@ -11,6 +11,20 @@
   <main id="game-wrap">
     <div id="stage">
       <canvas id="game" width="960" height="540" tabindex="0" aria-label="Betinho — O caminho de casa. Cartões narrativos podem ser confirmados com Enter, Espaço ou A/B. Setas movem, Espaço pula e P pausa."></canvas>
+      <div id="touch-controls" aria-label="Controles de toque">
+        <div class="touch-directions" aria-label="Direção">
+          <button type="button" data-touch-action="left" aria-label="Mover para a esquerda">◀</button>
+          <button type="button" data-touch-action="down" aria-label="Baixar ou mergulhar">▼</button>
+          <button type="button" data-touch-action="right" aria-label="Mover para a direita">▶</button>
+        </div>
+        <div class="touch-actions" aria-label="Ações">
+          <button type="button" data-touch-action="jump" aria-label="Pular ou confirmar">A</button>
+          <button type="button" data-touch-action="dash" aria-label="Dash ou esquiva">X</button>
+          <button type="button" data-touch-action="punch" data-touch-fight aria-label="Soco">B</button>
+          <button type="button" data-touch-action="kick" data-touch-fight aria-label="Chute">Y</button>
+        </div>
+        <button type="button" class="touch-pause" data-touch-action="pause" aria-label="Pausar">Ⅱ</button>
+      </div>
       <section id="pause-panel" role="dialog" aria-modal="true" aria-labelledby="pause-heading" hidden>
         <div id="pause-main" class="pause-layout">
           <div class="pause-actions">
@@ -49,7 +63,7 @@
     </div>
     <p id="hint">← → mover · Espaço / ↑ pular duas vezes · X / Shift dash · ↓ mergulho · P / Esc pausa · pontos TROCA alternam o Líder</p>
   </main>
-  <script src="game.js?v=6"></script>
-  <script src="ui.js?v=6"></script>
+  <script src="game.js?v=7"></script>
+  <script src="ui.js?v=7"></script>
 </body>
 </html>

@@ -34,16 +34,18 @@ pausePanel.addEventListener("keyup", e => {
 
 function syncGameUI() {
   const open = state === STATE.PAUSED;
+  const touchControls = document.getElementById("touch-controls");
+  if (touchControls) touchControls.dataset.fight = String(currentLevel().type === "fight");
   const signature = [open, pauseFocus, pauseConfirm, pauseAccept, Sound.muted,
-    assist.infiniteLives, assist.noFallDeath, levelIndex, bonusActive,
+    assist.infiniteLives, assist.noFallDeath, levelIndex, bonusActive, currentLevel().type,
     interlude && interlude.clueIndex].join("|");
   if (signature === uiSignature) return;
   uiSignature = signature;
   document.getElementById("hint").textContent = currentLevel().type === "fight"
-    ? "Arena · ← → mover · Espaço / A pular · Z / B soco · Y chute · X / Shift esquiva · ↓ mergulho · P guia"
+    ? "Arena · ← → / ◀ ▶ mover · Espaço / A / toque A pular · Z / B / toque B soco · Y / toque Y chute · X / toque X esquiva · ↓ / ▼ mergulho · P / Ⅱ pausa"
     : bonusActive
-      ? "← → mover · Espaço / ↑ pular duas vezes · X / Shift dash · ↓ mergulho · P / Esc pausa · encontre 3 pistas"
-      : "← → mover · Espaço / ↑ pular duas vezes · X / Shift dash · ↓ mergulho · P / Esc pausa · toque em TROCA para alternar o líder";
+      ? "← → / ◀ ▶ mover · Espaço / A / toque A pular · X / toque X dash · ↓ / ▼ mergulho · P / Ⅱ pausa · encontre 3 pistas"
+      : "← → / ◀ ▶ mover · Espaço / A / toque A pular · X / toque X dash · ↓ / ▼ mergulho · P / Ⅱ pausa · toque em TROCA para alternar o líder";
   const wasOpen = !pausePanel.hidden;
   pausePanel.hidden = !open;
   pausePanel.setAttribute("aria-labelledby", pauseConfirm ? "confirm-title" : "pause-heading");
@@ -60,6 +62,7 @@ function syncGameUI() {
   pauseButtons[3].textContent = "Vidas infinitas: " + (assist.infiniteLives ? "sim" : "não");
   pauseButtons[4].textContent = "Proteção contra quedas: " + (assist.noFallDeath ? "sim" : "não");
   for (const index of [2,3,4]) pauseButtons[index].setAttribute("aria-pressed", String(index === 2 ? !Sound.muted : index === 3 ? assist.infiniteLives : assist.noFallDeath));
+  document.querySelector(".guide-key").textContent = "Teclado · Controle Xbox · Toque";
   const guide = document.getElementById("move-guide");
   guide.replaceChildren(...moveGuide().map(([name, key, description]) => {
     const row = document.createElement("li");

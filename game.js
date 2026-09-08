@@ -50,6 +50,8 @@ SPR.qFrente.img.src = "assets/quindim-frente.png";
 
 /* ---------- Entrada de teclado ---------- */
 const keys = { left: false, right: false, jump: false, down: false, dash: false };
+const touch = { left: false, right: false, jump: false, down: false, dash: false };
+const touchPointers = new Map();
 const heldKeys = new Set();
 let inputActive = true;
 let jumpPressed = false; // borda de subida do pulo
@@ -130,11 +132,76 @@ function setKey(e, down) {
 window.addEventListener("keydown", (e) => setKey(e, true));
 window.addEventListener("keyup",   (e) => setKey(e, false));
 
+function releaseTouch(pointerId) {
+  const entry = touchPointers.get(pointerId);
+  if (!entry) return;
+  touchPointers.delete(pointerId);
+  if (entry.button?.releasePointerCapture) {
+    try { entry.button.releasePointerCapture(pointerId); } catch (_) {}
+  }
+  if (entry.action in touch) {
+    touch[entry.action] = [...touchPointers.values()].some(item => item.action === entry.action);
+    if (!touch[entry.action]) entry.button?.classList.remove("is-held");
+  }
+}
+
+function pressTouch(action, e) {
+  if (!inputActive || touchPointers.has(e.pointerId)) return;
+  e.preventDefault();
+  const button = e.currentTarget;
+  touchPointers.set(e.pointerId, { action, button });
+  if (button.setPointerCapture) {
+    try { button.setPointerCapture(e.pointerId); } catch (_) {}
+  }
+  Sound.ensure();
+  if (action === "pause") {
+    togglePause();
+    return;
+  }
+  if (action in touch) {
+    if (!touch[action]) {
+      touch[action] = true;
+      button.classList.add("is-held");
+      if (action === "jump") {
+        jumpPressed = true;
+        confirmPressed = true;
+        anyKey = true;
+      } else if (action === "down") {
+        downPressed = true;
+        menuDownPressed = true;
+      } else if (action === "dash") {
+        dashPressed = true;
+      }
+    }
+  } else if (action === "punch") {
+    punchPressed = true;
+  } else if (action === "kick") {
+    kickPressed = true;
+  }
+}
+
+const touchButtons = typeof document.querySelectorAll === "function"
+  ? document.querySelectorAll("[data-touch-action]") : [];
+for (const button of touchButtons) {
+  const action = button.dataset.touchAction;
+  button.addEventListener("pointerdown", e => pressTouch(action, e));
+  button.addEventListener("pointerup", e => releaseTouch(e.pointerId));
+  button.addEventListener("pointercancel", e => releaseTouch(e.pointerId));
+  button.addEventListener("lostpointercapture", e => releaseTouch(e.pointerId));
+}
+
+function clearTouchInput() {
+  for (const entry of touchPointers.values()) entry.button?.classList.remove("is-held");
+  touchPointers.clear();
+  for (const action of Object.keys(touch)) touch[action] = false;
+}
+
 function suspendInput() {
   inputActive = false;
   heldKeys.clear();
   for (const key of Object.keys(keys)) keys[key] = false;
   for (const key of Object.keys(pad)) pad[key] = false;
+  clearTouchInput();
   jumpPressed = downPressed = dashPressed = punchPressed = kickPressed = false;
   menuUpPressed = menuDownPressed = confirmPressed = anyKey = false;
   if (state === STATE.PLAYING || state === STATE.INTERLUDE) togglePause();
@@ -1845,8 +1912,8 @@ function updatePlaying() {
   // --- Jogador: movimento horizontal (teclado OU controle) ---
   const moveSpeed = player.speedBoostT > 0 ? MOVE_SPEED * 1.6 : MOVE_SPEED;
   player.vx = 0;
-  if (keys.left  || pad.left)  { player.vx = -moveSpeed; player.facing = -1; }
-  if (keys.right || pad.right) { player.vx =  moveSpeed; player.facing =  1; }
+  if (keys.left  || pad.left  || touch.left)  { player.vx = -moveSpeed; player.facing = -1; }
+  if (keys.right || pad.right || touch.right) { player.vx =  moveSpeed; player.facing =  1; }
   player.moving = player.vx !== 0 && !player.pounding;
 
   // --- Dash: investida horizontal breve (tecla X/Shift ou botão X) ---
@@ -1905,7 +1972,7 @@ function updatePlaying() {
   if (!player.pounding && player.vy > MAX_FALL) player.vy = MAX_FALL;
 
   // --- Planar com a Pena: segurar pular no ar freia bastante a queda ---
-  if (player.hasFeather && !player.onGround && !player.pounding && player.vy > 1.5 && (keys.jump || pad.jump)) {
+  if (player.hasFeather && !player.onGround && !player.pounding && player.vy > 1.5 && (keys.jump || pad.jump || touch.jump)) {
     player.vy = 1.5;
   }
 
@@ -1986,7 +2053,7 @@ function updatePlaying() {
   if (player.invuln > 0) player.invuln--;
 
   // --- Entrada de túnel (segurando ↓; exige o líder menor) ---
-  if ((keys.down || pad.down) && player.onGround) {
+  if ((keys.down || pad.down || touch.down) && player.onGround) {
     const t = tunnelEntranceCheck(lv);
     if (t) {
       if (player.form === "quindim") {
@@ -2183,8 +2250,8 @@ function updateInterlude() {
 
   player.vx = 0;
   const moveSpeed = player.speedBoostT > 0 ? MOVE_SPEED * 1.6 : MOVE_SPEED;
-  if (keys.left || pad.left) { player.vx = -moveSpeed; player.facing = -1; }
-  if (keys.right || pad.right) { player.vx = moveSpeed; player.facing = 1; }
+  if (keys.left || pad.left || touch.left) { player.vx = -moveSpeed; player.facing = -1; }
+  if (keys.right || pad.right || touch.right) { player.vx = moveSpeed; player.facing = 1; }
   player.moving = player.vx !== 0 && !player.pounding;
   if (player.dashCooldown > 0) player.dashCooldown--;
   if (dashPressed && player.dashCooldown === 0 && player.dashT === 0 && !player.pounding) {
@@ -2209,7 +2276,7 @@ function updateInterlude() {
   jumpPressed = false;
   player.vy += GRAVITY;
   if (!player.pounding && player.vy > MAX_FALL) player.vy = MAX_FALL;
-  if (player.hasFeather && !player.onGround && !player.pounding && player.vy > 1.5 && (keys.jump || pad.jump)) player.vy = 1.5;
+  if (player.hasFeather && !player.onGround && !player.pounding && player.vy > 1.5 && (keys.jump || pad.jump || touch.jump)) player.vy = 1.5;
 
   player.x += player.vx;
   for (const s of lv.solids.concat(movers)) if (aabb(player, s)) {
@@ -2383,8 +2450,8 @@ function updateFight() {
 
   // --- Movimento do jogador (sem scroll; paredes do ringue em 40..W-40) ---
   player.vx = 0;
-  if (keys.left || pad.left) { player.vx = -MOVE_SPEED; player.facing = -1; }
-  if (keys.right || pad.right) { player.vx = MOVE_SPEED; player.facing = 1; }
+  if (keys.left || pad.left || touch.left) { player.vx = -MOVE_SPEED; player.facing = -1; }
+  if (keys.right || pad.right || touch.right) { player.vx = MOVE_SPEED; player.facing = 1; }
   player.moving = player.vx !== 0 && !player.pounding;
 
   if (player.dashCooldown > 0) player.dashCooldown--;
@@ -3321,16 +3388,16 @@ function updatePause() {
 }
 function moveGuide() {
   return currentLevel().type === "fight" ? [
-    ["Pular", "↑ / Espaço · A", "Pule a investida e reposicione-se."],
-    ["Soco", "Z · B", "Rápido e curto: 1 de dano."],
-    ["Chute", "Y · botão Y", "Mais alcance: 2 de dano, recuperação lenta."],
-    ["Esquiva", "X / Shift · botão X", "Cruze o ataque. Recarga de 0,75 s."],
-    ["Mergulho", "↓ no ar · direcional ↓", "Acerte por cima: 2 de dano."],
+    ["Pular", "↑ / Espaço · A · toque A", "Pule a investida e reposicione-se."],
+    ["Soco", "Z · B · toque B", "Rápido e curto: 1 de dano."],
+    ["Chute", "Y · botão Y · toque Y", "Mais alcance: 2 de dano, recuperação lenta."],
+    ["Esquiva", "X / Shift · botão X · toque X", "Cruze o ataque. Recarga de 0,75 s."],
+    ["Mergulho", "↓ no ar · direcional ↓ · toque ▼", "Acerte por cima: 2 de dano."],
   ] : [
-    ["Pulo duplo", "↑ / Espaço · A/B", "Solte e aperte novamente no ar."],
-    ["Dash", "X / Shift · X", "Ganhe distância e atravesse inimigos."],
-    ["Mergulho", "↓ no ar · direcional ↓", "O impacto atinge os inimigos ao redor."],
-    ["Planar", "Segure pular com a pena", "Desça devagar para escolher onde pousar."],
+    ["Pulo duplo", "↑ / Espaço · A/B · toque A", "Solte e aperte novamente no ar."],
+    ["Dash", "X / Shift · X · toque X", "Ganhe distância e atravesse inimigos."],
+    ["Mergulho", "↓ no ar · direcional ↓ · toque ▼", "O impacto atinge os inimigos ao redor."],
+    ["Planar", "Segure pular com a pena · segure A", "Desça devagar para escolher onde pousar."],
     ["Pontos de troca", "Toque no marco dourado", "Alterne o líder quando o caminho pedir outro tamanho."],
   ];
 }

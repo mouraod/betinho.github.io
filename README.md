@@ -14,25 +14,25 @@ Cada Etapa tem cartão narrativo que pausa a simulação até confirmação. A d
 
 ## Movimentos
 
-| Ação | Teclado | Controle Xbox | Função |
-|---|---|---|---|
-| Mover | Setas | Direcional / analógico | Posicionamento |
-| Pulo duplo | ↑ / Espaço | A / B | Soltar e apertar outra vez no ar |
-| Dash na plataforma | X / Shift | X | Distância e ataque horizontal |
-| Mergulho | ↓ no ar | Direcional ↓ no ar | Impacto em área na plataforma; 2 de dano por cima no chefe |
-| Planar | Segurar pular com a pena | Segurar A / B com a pena | Controlar a descida |
-| Trocar o Líder | Tocar um ponto TROCA | — | Alterna entre Betinho e Quindim; o ponto pode ser usado novamente |
-| Entrar no túnel | ↓ na entrada | Direcional ↓ | O Líder menor passa nos espaços menores |
-| Soco na arena | Z | B | 1 de dano, curto alcance e recuperação rápida |
-| Chute na arena | Y | Y | 2 de dano, maior alcance e recuperação lenta |
-| Esquiva na arena | X / Shift | X | Breve invulnerabilidade e recarga de 0,75 s |
-| Pausa | P / Esc | Start | Menu, assistência e guia contextual |
+| Ação | Teclado | Controle Xbox | Toque | Função |
+|---|---|---|---|---|
+| Mover | Setas | Direcional / analógico | ◀ ▶ | Posicionamento |
+| Pulo duplo | ↑ / Espaço | A / B | A | Soltar e apertar outra vez no ar |
+| Dash na plataforma | X / Shift | X | X | Distância e ataque horizontal |
+| Mergulho | ↓ no ar | Direcional ↓ no ar | ▼ | Impacto em área; 2 de dano por cima no chefe |
+| Planar | Segurar pular com a pena | Segurar A / B com a pena | Segurar A | Controlar a descida |
+| Trocar o Líder | Tocar um ponto TROCA | — | Tocar o ponto TROCA | Alterna entre Betinho e Quindim |
+| Entrar no túnel | ↓ na entrada | Direcional ↓ | ▼ na entrada | O Líder menor passa nos espaços menores |
+| Soco na arena | Z | B | B | 1 de dano, curto alcance |
+| Chute na arena | Y | Y | Y | 2 de dano, maior alcance |
+| Esquiva na arena | X / Shift | X | X | Breve invulnerabilidade |
+| Pausa | P / Esc | Start | Ⅱ | Menu, assistência e guia contextual |
 
 O chefe fica vulnerável depois de errar; bater na parede torna o próximo golpe recebido duas vezes mais forte. A investida tem aviso antes do avanço. Cada confronto tem duas vitórias necessárias, com maior velocidade na segunda parte.
 
 ## Pausa e progressão
 
-O menu aceita mouse, Tab, setas e gamepad. Permite continuar, reiniciar a Etapa, alternar som, vidas infinitas e proteção contra quedas, ou voltar ao título. Reiniciar e sair exigem confirmação dentro do jogo, com Cancelar selecionado inicialmente. Os cartões narrativos e cenas têm confirmação própria, ficam visíveis indefinidamente e ignoram qualquer confirmação durante o primeiro segundo.
+O menu aceita mouse, toque, Tab, setas e gamepad. No iPad, os controles aparecem automaticamente sobre o jogo e funcionam com múltiplos dedos; o modo paisagem é recomendado. Permite continuar, reiniciar a Etapa, alternar som, vidas infinitas e proteção contra quedas, ou voltar ao título. Reiniciar e sair exigem confirmação dentro do jogo, com Cancelar selecionado inicialmente. Os cartões narrativos e cenas têm confirmação própria, ficam visíveis indefinidamente e ignoram qualquer confirmação durante o primeiro segundo.
 
 Decisões definidas com Davi:
 

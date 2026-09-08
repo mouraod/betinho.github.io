@@ -7,6 +7,19 @@ const path = require('node:path');
 function game() {
   const listeners = {};
   const documentListeners = {};
+  const touchButtons = new Map();
+  for (const action of ['left', 'right', 'down', 'jump', 'dash', 'punch', 'kick', 'pause']) {
+    const buttonListeners = {};
+    touchButtons.set(action, {
+      dataset: { touchAction: action },
+      classList: { add() {}, remove() {} },
+      addEventListener(name, fn) { buttonListeners[name] = fn; },
+      setPointerCapture() {}, releasePointerCapture() {},
+      fire(name, pointerId = 1) {
+        buttonListeners[name]?.({ pointerId, currentTarget: this, preventDefault() {} });
+      },
+    });
+  }
   const sandbox = {
     console, URLSearchParams, performance: { now: () => 0 },
     Image: class { complete = false; },
@@ -17,6 +30,7 @@ function game() {
     document: {
       hidden: false,
       getElementById: () => ({ width: 960, height: 540, getContext: () => ({}) }),
+      querySelectorAll: () => [...touchButtons.values()],
       addEventListener: (name, fn) => { documentListeners[name] = fn; },
     },
   };
@@ -29,10 +43,43 @@ function game() {
     key(code, down = true, repeat = false) {
       listeners[down ? 'keydown' : 'keyup']({ code, repeat, preventDefault() {} });
     },
+    touch(action, event = 'pointerdown', pointerId = 1) {
+      touchButtons.get(action).fire(event, pointerId);
+    },
     blur() { listeners.blur?.(); },
     hide() { sandbox.document.hidden = true; documentListeners.visibilitychange?.(); },
   };
 }
+
+test('toque mantém direção, permite ação simultânea e libera no pointerup', () => {
+  const g = game();
+  g.touch('right', 'pointerdown', 1);
+  g.touch('jump', 'pointerdown', 2);
+  g.touch('dash', 'pointerdown', 3);
+  assert.equal(g.run('touch.right'), true);
+  assert.equal(g.run('touch.jump'), true);
+  assert.equal(g.run('jumpPressed'), true);
+  assert.equal(g.run('dashPressed'), true);
+  assert.equal(g.run('confirmPressed'), true);
+  g.touch('right', 'pointerup', 1);
+  g.touch('jump', 'pointercancel', 2);
+  assert.equal(g.run('touch.right'), false);
+  assert.equal(g.run('touch.jump'), false);
+});
+
+test('toques de arena disparam apenas o golpe correspondente e blur limpa tudo', () => {
+  const g = game();
+  g.touch('punch');
+  assert.equal(g.run('punchPressed'), true);
+  assert.equal(g.run('kickPressed'), false);
+  g.touch('punch', 'pointerup');
+  g.run('punchPressed = false');
+  g.touch('kick');
+  assert.equal(g.run('kickPressed'), true);
+  g.touch('left', 'pointerdown', 4);
+  g.blur();
+  assert.equal(g.run('touch.left || touch.kick || touch.jump'), false);
+});
 
 test('segurar pausa e mudo não alterna repetidamente', () => {
   const g = game();
