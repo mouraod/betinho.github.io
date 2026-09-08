@@ -466,3 +466,23 @@ segurança. O design já é mais coerente do que o histórico de mudanças de g�
 sugere; o final de luta funciona porque manteve os verbos de movimento, e corrida
 também funcionará se for "os mesmos verbos, contra o relógio", não um novo
 conjunto de verbos.
+
+---
+
+## Status da implementação
+
+- **M1 — passo de movimento unificado** ✔ (`stepPlayer(env)` + `poundLandingAOE()`;
+  suíte `tests/player-step.test.cjs`).
+- **M3 — save único versionado** ✔ (`betinho_save` com migração; suíte
+  `tests/save.test.cjs`).
+- **M2 — fluxo da campanha como dados** ✔ (`CAMPAIGN_FLOW`: interludeAfter/resumeAt/
+  lastStage substituem os números mágicos 7/8/15; injeção de sombras e cópia do
+  título derivadas do fluxo; hack do swap de `LEVEL_MUSIC` eliminado por troca
+  inline dos dois literais).
+- **M4 — despacho central de modos** ✔ (`MODES` + `modeKeyOf`/`chapterMode`/
+  `modeInfo()`; `updatePlaying`/`drawWorld`/`loadLevel`/entrada/guia/UI consultam o
+  registro; suíte `tests/mode-dispatch.test.cjs`).
+- Pendente (auditoria): S1 (dobrar velocidades/música/paleta por fase no config da
+  fase), S2 (reset único do jogador), S3 (semântica de checkpoint numa função),
+  S4 (passada de design das mecânicas subutilizadas) — e o modo corrida em si,
+  que agora é uma linha em `MODES` + sua lógica.

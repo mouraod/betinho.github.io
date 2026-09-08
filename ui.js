@@ -46,7 +46,7 @@ function overlaps(a, b) {
     * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
 }
 function touchCharacters(stageRect, scaleX, scaleY) {
-  const inFight = currentLevel().type === "fight";
+  const inFight = modeInfo().isArena;
   const entities = inFight ? [player] : [player, companion];
   if (inFight && fight?.boss) entities.push(fight.boss);
   return entities.filter(Boolean).map(entity => ({
@@ -113,14 +113,14 @@ pausePanel.addEventListener("keyup", e => {
 
 function syncGameUI() {
   const open = state === STATE.PAUSED;
-  if (touchControls) touchControls.dataset.fight = String(currentLevel().type === "fight");
+  if (touchControls) touchControls.dataset.fight = String(modeInfo().isArena);
   updateTouchLayout();
   const signature = [open, pauseFocus, pauseConfirm, pauseAccept, Sound.muted,
     assist.infiniteLives, assist.noFallDeath, levelIndex, bonusActive, currentLevel().type,
     interlude && interlude.clueIndex].join("|");
   if (signature === uiSignature) return;
   uiSignature = signature;
-  document.getElementById("hint").textContent = currentLevel().type === "fight"
+  document.getElementById("hint").textContent = modeInfo().isArena
     ? "Arena · ← → / ◀ ▶ mover · Espaço / A / toque A pular · Z / B / toque B soco · Y / toque Y chute · X / toque X esquiva · ↓ / ▼ mergulho · P / Ⅱ pausa"
     : bonusActive
       ? "← → / ◀ ▶ mover · Espaço / A / toque A pular · X / toque X dash · ↓ / ▼ mergulho · P / Ⅱ pausa · encontre 3 pistas"
@@ -132,7 +132,7 @@ function syncGameUI() {
     if (wasOpen) canvas.focus({ preventScroll: true });
     return;
   }
-  document.getElementById("pause-stage").textContent = bonusActive ? "Interlúdio · entre as etapas 8 e 9" : `Etapa ${levelIndex + 1} de 16`;
+  document.getElementById("pause-stage").textContent = bonusActive ? `Interlúdio · entre as etapas ${CAMPAIGN_FLOW.interludeAfter + 1} e ${CAMPAIGN_FLOW.resumeAt + 1}` : `Etapa ${levelIndex + 1} de ${LEVELS.length}`;
   document.getElementById("pause-title").textContent = bonusActive ? "O rastro de Quindim" : JOURNEY[levelIndex][0];
   document.getElementById("pause-story").textContent = bonusActive ? "Betinho segue três pistas obrigatórias. Cada pista vira um marco de retorno." : JOURNEY[levelIndex][1];
   document.getElementById("pause-tip").textContent = bonusActive ? "Pistas encontradas: " + (interlude ? `${interlude.clueIndex} de 3` : "0 de 3") : JOURNEY[levelIndex][2];

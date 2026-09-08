@@ -97,7 +97,7 @@ function setKey(e, down) {
       keys.dash = heldKeys.has("KeyX") || heldKeys.has("ShiftLeft") || heldKeys.has("ShiftRight");
       break;
     case "KeyY":
-      if (down && currentLevel().type === "fight") kickPressed = true;
+      if (down && modeInfo().isArena) kickPressed = true;
       break;
     case "Enter":
       if (down) anyKey = true;
@@ -442,7 +442,7 @@ function pollGamepad() {
     if (x < -PAD_DEADZONE || down(14) || hatL) pad.left = true;
     if (x >  PAD_DEADZONE || down(15) || hatR) pad.right = true;
     if (y >  PAD_DEADZONE || down(13) || hatD) pad.down = true;
-    const inFight = currentLevel().type === "fight";
+    const inFight = modeInfo().isArena;
     jumpHeld = down(0) || (!inFight && down(1)) || down(12) || (y < -PAD_DEADZONE);
     pad.jump = jumpHeld; // usado pra segurar o planar da Pena
     confirm  = down(0) || down(1) || down(9);
@@ -1380,11 +1380,25 @@ function currentLevel() {
 }
 
 function campaignLabel() {
-  return bonusActive ? "Interlúdio" : `Etapa ${levelIndex + 1} de 16`;
+  return bonusActive ? "Interlúdio" : `Etapa ${levelIndex + 1} de ${LEVELS.length}`;
 }
 
-/* Sombrias novas aparecem progressivamente na floresta, sem alterar a geometria original. */
-for (let i = 8; i <= 14; i++) {
+/* Fluxo da campanha — os marcos da história, declarados uma única vez em vez de
+   números mágicos espalhados (antes: 7/8/15 espalhados entre updatePlaying,
+   updateScene, endRound e startInterlude). Etapas avançam em sequência salvo
+   onde o fluxo manda outra coisa: completar a Etapa em interludeAfter entra no
+   interlúdio (via cena de separação); a jornada retoma em resumeAt; vencer
+   lastStage encerra a viagem. Um modo novo (ex.: corrida) entra aqui como marco
+   próprio em vez de virar um if de índice. */
+const CAMPAIGN_FLOW = {
+  interludeAfter: 7, // índice da Etapa cuja conclusão abre o interlúdio (Etapa 8)
+  resumeAt: 8,       // índice em que a jornada retoma após o interlúdio (Etapa 9)
+  lastStage: LEVELS.length - 1, // índice da Etapa final (o confronto)
+};
+
+/* Sombrias novas aparecem progressivamente na floresta, sem alterar a geometria
+   original: do retorno do interlúdio até a véspera do confronto final. */
+for (let i = CAMPAIGN_FLOW.resumeAt; i < CAMPAIGN_FLOW.lastStage; i++) {
   const lv = LEVELS[i];
   const floor = (lv.solids || []).find((s) => s.y === GROUND_Y && s.w > 240);
   if (!floor) continue;
@@ -1446,8 +1460,10 @@ const LEVEL_MUSIC = [
   { melody: [311, 370, 349, 311, 277, 311, 370, 349, 311, 370, 415, 466, 415, 370, 311, 0], bass: [78, 93, 87, 69], stepSec: 0.16 },
   { melody: [370, 440, 415, 370, 330, 370, 440, 415, 370, 440, 494, 440, 415, 370, 330, 0], bass: [93, 110, 104, 82], stepSec: 0.15 },
   { melody: [330, 392, 370, 330, 311, 330, 392, 370, 330, 392, 440, 494, 466, 415, 349, 0], bass: [82, 98, 93, 78], stepSec: 0.14 },
-  { melody: [220, 220, 262, 220, 233, 233, 277, 233, 220, 220, 294, 277, 262, 233, 220, 0], bass: [55, 55, 65, 58], stepSec: 0.22 },
+  // Etapa 15 (índice 14) e Etapa 16/confronto (índice 15) — trocadas de lugar
+  // diretamente aqui (antes, um hack trocava os dois índices após a definição).
   { melody: [392, 466, 440, 392, 349, 392, 466, 440, 392, 466, 523, 587, 523, 466, 392, 0], bass: [98, 117, 110, 87], stepSec: 0.13 },
+  { melody: [220, 220, 262, 220, 233, 233, 277, 233, 220, 220, 294, 277, 262, 233, 220, 0], bass: [55, 55, 65, 58], stepSec: 0.22 },
 ];
 
 const INTERLUDE_MUSIC = {
@@ -1456,8 +1472,6 @@ const INTERLUDE_MUSIC = {
   bass: [65, 0, 73, 0],
   stepSec: 0.30,
 };
-
-[LEVEL_MUSIC[14], LEVEL_MUSIC[15]] = [LEVEL_MUSIC[15], LEVEL_MUSIC[14]];
 
 /* Velocidade dos inimigos cresce por fase */
 const PATROL_SPEED = [1.1, 1.5, 2.0, 2.4, 2.8, 2.2, 2.2, 2.3,  2.6, 2.9, 3.1, 3.3, 3.5, 3.2, 3.7, 3.2];
@@ -1744,7 +1758,7 @@ function loadLevel(i) {
   tunnelAnim = null; playerVisualScaleY = 1; tunnelDenyCooldown = 0;
   particles = [];
 
-  if (lv.type === "fight") {
+  if (modeKeyOf(lv) === "fight") {
     enemies = []; checkpoints = []; coins = []; quindins = []; exchangePoints = []; movers = []; tunnels = [];
     stars = []; boosts = []; feathers = [];
     respawn = { x: lv.start.x, y: lv.start.y };
@@ -1840,7 +1854,7 @@ function returnToTitle() {
 function startInterlude({ replay = false } = {}) {
   bonusActive = true;
   activeChapter = { kind: "interlude", id: BONUS_ID, position: 8.5 };
-  levelIndex = 7; // referência visual: ruptura entre 8 e 9
+  levelIndex = CAMPAIGN_FLOW.interludeAfter; // referência visual: ruptura entre 8 e 9
   interlude = {
     replay,
     clueIndex: 0,
@@ -1904,6 +1918,29 @@ function loseLife() {
     }
     cameraX = Math.max(0, Math.min(respawn.x + PW / 2 - W / 2, lv.worldW - W));
   }
+}
+
+/* ============================================================
+   MODOS DE GAMEPLAY — registro único (auditoria M4)
+   ============================================================ */
+// Cada capítulo jogável é um modo (plataforma, interlúdio, arena). O resto do
+// código consulta MODES/modeInfo() em vez de espalhar if (type === "fight") e
+// if (bonusActive). Um modo novo (ex.: corrida) é uma linha no registro + sua
+// própria lógica — o despacho, a UI de fora e os fatos de entrada não mudam.
+function modeKeyOf(lv) {
+  return lv.type === "fight" ? "fight" : lv.type === "interlude" ? "interlude" : "platform";
+}
+function chapterMode() {
+  return bonusActive ? "interlude" : modeKeyOf(currentLevel());
+}
+const MODES = {
+  platform:  { update: updatePlayingCore, draw: drawStageWorld, isArena: false },
+  interlude: { update: updateInterlude,   draw: drawStageWorld, isArena: false },
+  fight:     { update: updateFight,       draw: drawFight,      isArena: true },
+};
+function modeInfo() {
+  const m = chapterMode();
+  return { mode: m, isArena: MODES[m].isArena };
 }
 
 /* ============================================================
@@ -2069,10 +2106,16 @@ function poundLandingAOE() {
 }
 
 function updatePlaying() {
+  // Despacho pelo registro de modos (auditoria M4): a arena e o interlúdio
+  // têm entradas em MODES; um modo novo entra lá, não num if novo aqui.
+  if (levelFinishing) return; // congela a simulação durante o fade de troca
+  MODES[chapterMode()].update();
+}
+
+/* Travessia de uma Etapa numerada — modo plataforma */
+function updatePlayingCore() {
   const lv = currentLevel();
   if (levelFinishing) return;
-  if (bonusActive) { updateInterlude(); return; }
-  if (lv.type === "fight") { updateFight(); return; }
 
   if (toastT > 0) { toastT--; if (toastT <= 0) toastMsg = null; }
   if (tunnelDenyCooldown > 0) tunnelDenyCooldown--;
@@ -2310,9 +2353,9 @@ function updatePlaying() {
   if (player.x + player.w >= lv.goalX && !levelFinishing) {
     levelFinishing = true;
     player.vx = 0; player.vy = 0;
-    if (levelIndex === 7) {
+    if (levelIndex === CAMPAIGN_FLOW.interludeAfter) {
       fadeOut(() => { levelFinishing = false; beginScene("separation"); });
-    } else if (levelIndex >= LEVELS.length - 1) {
+    } else if (levelIndex >= CAMPAIGN_FLOW.lastStage) {
       fadeOut(() => { state = STATE.VICTORY; victoryScenePending = true; loopCount++; Sound.stopMusic(); Sound.victory(); });
     } else {
       Sound.levelUp();
@@ -2463,7 +2506,7 @@ function endRound(playerWon) {
     if (fight.wins >= 2) {
       Sound.ko();
       addShake(18);
-      state = levelIndex === LEVELS.length - 1 ? STATE.VICTORY : STATE.FIGHT_WON;
+      state = levelIndex === CAMPAIGN_FLOW.lastStage ? STATE.VICTORY : STATE.FIGHT_WON;
       if (state === STATE.VICTORY) { victoryScenePending = true; loopCount++; Sound.victory(); }
       Sound.stopMusic();
       return;
@@ -3396,7 +3439,7 @@ function updatePause() {
   if (confirmPressed || anyKey) pauseAction(pauseFocus);
 }
 function moveGuide() {
-  return currentLevel().type === "fight" ? [
+  return modeInfo().isArena ? [
     ["Pular", "↑ / Espaço · A · toque A", "Pule a investida e reposicione-se."],
     ["Soco", "Z · B · toque B", "Rápido e curto: 1 de dano."],
     ["Chute", "Y · botão Y · toque Y", "Mais alcance: 2 de dano, recuperação lenta."],
@@ -3544,7 +3587,7 @@ function updateScene() {
   const kind = scene.kind;
   scene = null;
   if (kind === "separation") startInterlude();
-  else if (kind === "reunion") beginStage(8, true);
+  else if (kind === "reunion") beginStage(CAMPAIGN_FLOW.resumeAt, true);
   else { state = STATE.VICTORY; victoryScenePending = false; Sound.victory(); }
 }
 function drawTitle() {
@@ -3570,7 +3613,7 @@ function drawTitle() {
   }
   ctx.fillStyle = "#c5d8d9"; ctx.font = "16px 'Trebuchet MS', sans-serif";
   ctx.fillText("↑ ↓ escolher · Enter / A confirmar · O: assistência", 69, 470);
-  ctx.fillText("16 Etapas · Interlúdio entre 8 e 9 · recorde na Etapa " + Math.min(LEVELS.length, bestLevel), 69, 496);
+  ctx.fillText(LEVELS.length + " Etapas · Interlúdio entre " + (CAMPAIGN_FLOW.interludeAfter + 1) + " e " + (CAMPAIGN_FLOW.resumeAt + 1) + " · recorde na Etapa " + Math.min(LEVELS.length, bestLevel), 69, 496);
   const b = SPR.frente, q = SPR.qFrente;
   if (b.img.complete && b.img.naturalWidth) ctx.drawImage(b.img,b.sx,b.sy,b.sw,b.sh,650,196,134,178);
   if (q.img.complete && q.img.naturalWidth) ctx.drawImage(q.img,q.sx,q.sy,q.sw,q.sh,782,260,95,127);
@@ -3810,8 +3853,13 @@ function drawFight() {
 }
 
 function drawWorld() {
+  // Desenho por registro de modos (auditoria M4): plataforma e interlúdio
+  // compartilham o mundo; a arena desenha o ringue.
+  MODES[chapterMode()].draw();
+}
+
+function drawStageWorld() {
   const lv = currentLevel();
-  if (lv.type === "fight") { drawFight(); return; }
   drawBackground(lv);
 
   // tremor de tela nos impactos (pisão, pouso de ground pound)
