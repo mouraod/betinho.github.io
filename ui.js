@@ -1,5 +1,7 @@
 "use strict";
 
+const stage = document.getElementById("stage");
+const fullscreenButton = document.getElementById("fullscreen-toggle");
 const pausePanel = document.getElementById("pause-panel");
 const pauseButtons = [...document.querySelectorAll("[data-pause-action]")];
 const pauseMain = document.getElementById("pause-main");
@@ -7,6 +9,32 @@ const pauseConfirmation = document.getElementById("pause-confirmation");
 const pauseCancelButton = document.getElementById("pause-cancel");
 const pauseAcceptButton = document.getElementById("pause-accept");
 let uiSignature = "";
+
+function fullscreenElement() {
+  return document.fullscreenElement || document.webkitFullscreenElement;
+}
+function syncFullscreenButton() {
+  const active = fullscreenElement() === stage;
+  fullscreenButton.textContent = active ? "×" : "⛶";
+  fullscreenButton.title = active ? "Sair da tela cheia" : "Tela cheia";
+  fullscreenButton.setAttribute("aria-label", active ? "Sair da tela cheia" : "Entrar em tela cheia");
+}
+fullscreenButton.addEventListener("click", async () => {
+  try {
+    if (fullscreenElement()) {
+      if (document.exitFullscreen) await document.exitFullscreen();
+      else if (document.webkitExitFullscreen) await document.webkitExitFullscreen();
+    } else if (stage.requestFullscreen) {
+      await stage.requestFullscreen();
+    } else if (stage.webkitRequestFullscreen) {
+      await stage.webkitRequestFullscreen();
+    }
+  } catch (_) {}
+  syncFullscreenButton();
+});
+document.addEventListener("fullscreenchange", syncFullscreenButton);
+document.addEventListener("webkitfullscreenchange", syncFullscreenButton);
+syncFullscreenButton();
 
 pauseButtons.forEach((button, index) => {
   button.addEventListener("click", () => { pauseFocus = index; pauseAction(index); syncGameUI(); });

@@ -7,6 +7,8 @@ body { background: radial-gradient(circle at 50% -10%, #254858 0, #0e2633 34%, v
 #stage { position: relative; width: min(1200px, 100%, calc((100svh - 82px) * 16 / 9)); aspect-ratio: 16 / 9; box-shadow: 0 22px 0 #050c14, 0 28px 80px #000b; border: 3px solid #496c70; border-radius: 3px; overflow: hidden; background: #0b1824; }
 #game { display: block; width: 100%; height: 100%; background: #6fb7ff; }
 #game:focus { outline: none; }
+#fullscreen-toggle { position: absolute; top: 12px; left: 12px; z-index: 3; min-width: 48px; min-height: 48px; padding: 8px 12px; border: 2px solid #fff3d699; border-radius: 8px; background: #102433cc; color: var(--paper); font-size: 20px; line-height: 1; text-align: center; opacity: .9; }
+#fullscreen-toggle:hover { transform: none; }
 #touch-controls { display: none; position: absolute; inset: 0; z-index: 1; pointer-events: none; }
 .touch-directions, .touch-actions { position: absolute; bottom: clamp(12px, 3vw, 28px); display: flex; gap: 8px; pointer-events: auto; }
 .touch-directions { left: clamp(12px, 3vw, 28px); }
@@ -17,6 +19,8 @@ body { background: radial-gradient(circle at 50% -10%, #254858 0, #0e2633 34%, v
 #touch-controls [data-touch-fight] { display: none; }
 #touch-controls[data-fight="true"] [data-touch-fight] { display: block; }
 #pause-panel { z-index: 2; }
+#stage:fullscreen, #stage:-webkit-full-screen { width: 100vw; height: 100vh; max-width: none; aspect-ratio: auto; border: 0; border-radius: 0; }
+#stage:fullscreen #game, #stage:-webkit-full-screen #game { width: 100%; height: 100%; }
 #hint { max-width: 100%; font-size: 12px; color: var(--muted); text-align: center; line-height: 1.6; letter-spacing: .02em; }
 #pause-panel { position: absolute; inset: 0; background: linear-gradient(120deg, #0c1d2af5, #102b38f2 60%, #16283bf2); overflow: auto; padding: clamp(18px, 3.4vw, 42px); }
 .pause-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 70px); max-width: 1060px; margin: auto; }
