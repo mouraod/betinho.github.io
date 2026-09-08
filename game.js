@@ -313,40 +313,76 @@ const Sound = {
   },
 };
 
-/* ---------- Persistência local (mudo + recorde de fase) ---------- */
-function saveMuted() {
-  try { localStorage.setItem("betinho_muted", Sound.muted ? "1" : "0"); } catch (_) {}
+/* ---------- Persistência local (um único save versionado) ----------
+   Antes eram 5 chaves soltas sem versão (betinho_muted, betinho_bestLevel,
+   betinho_replayInterlude, betinho_assist*). Consolidado em betinho_save
+   com {version} para que corrida (melhores tempos, desbloqueios) adicione
+   campos sem migração traumática. As chaves antigas ainda são lidas uma
+   única vez e migradas. */
+const SAVE_KEY = "betinho_save";
+
+function persistSave() {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      version: 1,
+      muted: Sound.muted,
+      bestLevel,
+      replayInterlude: replayInterludeUnlocked,
+      assist: { infiniteLives: assist.infiniteLives, noFallDeath: assist.noFallDeath },
+    }));
+  } catch (_) {}
 }
-try { Sound.muted = localStorage.getItem("betinho_muted") === "1"; } catch (_) {}
 
 let bestLevel = 1; // 1-based, só pra exibir na tela de título
-try { bestLevel = parseInt(localStorage.getItem("betinho_bestLevel"), 10) || 1; } catch (_) {}
+let replayInterludeUnlocked = false;
+let assist = { infiniteLives: false, noFallDeath: false };
+
+/* carrega o save; se ausente ou sem versão, migra das chaves antigas */
+function loadSave() {
+  let migrated = false;
+  const old = {
+    muted: () => { try { return localStorage.getItem("betinho_muted") === "1"; } catch (_) { return false; } },
+    bestLevel: () => { try { return parseInt(localStorage.getItem("betinho_bestLevel"), 10) || 1; } catch (_) { return 1; } },
+    replayInterlude: () => { try { return localStorage.getItem("betinho_replayInterlude") === "1"; } catch (_) { return false; } },
+    infLives: () => { try { return localStorage.getItem("betinho_assistInfLives") === "1"; } catch (_) { return false; } },
+    noFall: () => { try { return localStorage.getItem("betinho_assistNoFall") === "1"; } catch (_) { return false; } },
+  };
+  let data = null;
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (raw) data = JSON.parse(raw);
+  } catch (_) {}
+  if (!data || !data.version) {
+    data = {
+      version: 1,
+      muted: old.muted(),
+      bestLevel: old.bestLevel(),
+      replayInterlude: old.replayInterlude(),
+      assist: { infiniteLives: old.infLives(), noFallDeath: old.noFall() },
+    };
+    migrated = true;
+  }
+  Sound.muted = !!data.muted;
+  bestLevel = data.bestLevel >= 1 ? data.bestLevel : 1;
+  replayInterludeUnlocked = !!data.replayInterlude;
+  assist.infiniteLives = !!(data.assist && data.assist.infiniteLives);
+  assist.noFallDeath = !!(data.assist && data.assist.noFallDeath);
+  if (migrated) persistSave(); // grava o formato novo uma única vez
+}
+
+function saveMuted() { persistSave(); }
 function saveBestLevel(n) {
   if (n > bestLevel) {
     bestLevel = n;
-    try { localStorage.setItem("betinho_bestLevel", String(bestLevel)); } catch (_) {}
+    persistSave();
   }
 }
-
-let replayInterludeUnlocked = false;
-try { replayInterludeUnlocked = localStorage.getItem("betinho_replayInterlude") === "1"; } catch (_) {}
 function saveReplayInterlude() {
   replayInterludeUnlocked = true;
-  try { localStorage.setItem("betinho_replayInterlude", "1"); } catch (_) {}
+  persistSave();
 }
-
-/* ---------- Modo assistência (tela de Opções) ---------- */
-let assist = { infiniteLives: false, noFallDeath: false };
-try {
-  assist.infiniteLives = localStorage.getItem("betinho_assistInfLives") === "1";
-  assist.noFallDeath = localStorage.getItem("betinho_assistNoFall") === "1";
-} catch (_) {}
-function saveAssist() {
-  try {
-    localStorage.setItem("betinho_assistInfLives", assist.infiniteLives ? "1" : "0");
-    localStorage.setItem("betinho_assistNoFall", assist.noFallDeath ? "1" : "0");
-  } catch (_) {}
-}
+function saveAssist() { persistSave(); }
+loadSave(); // carrega (ou migra) o save único na inicialização
 
 /* ---------- Controle (Gamepad API) ----------
    Robusto a mappings não-padrão (GameSir/D-input etc.):
