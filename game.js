@@ -569,6 +569,10 @@ function makeLevel(cfg) { return cfg; }
 const LEVELS = [
   // ---------------- FASE 1 (tranquila) ----------------
   makeLevel({
+    music: { melody: [523, 659, 784, 659, 587, 698, 880, 698, 659, 784, 988, 784, 523, 440, 392, 0], bass: [131, 165, 196, 147], stepSec: 0.19 },
+    patrol: 1.1,
+    chase: 1.4,
+    theme: "dia",
     worldW: 2600,
     sky: ["#7ec8ff", "#bfe8ff"],
     hill: "#61c25a",
@@ -607,6 +611,10 @@ const LEVELS = [
 
   // ---------------- FASE 2 (média) ----------------
   makeLevel({
+    music: { melody: [392, 494, 587, 494, 440, 523, 659, 523, 392, 494, 587, 659, 587, 494, 440, 0], bass: [98, 131, 147, 110], stepSec: 0.16 },
+    patrol: 1.5,
+    chase: 1.9,
+    theme: "dia",
     worldW: 2900,
     sky: ["#ffb26b", "#ffd9a0"],
     hill: "#4fae7a",
@@ -653,6 +661,10 @@ const LEVELS = [
 
   // ---------------- FASE 3 (difícil) ----------------
   makeLevel({
+    music: { melody: [440, 523, 587, 523, 466, 554, 659, 554, 440, 523, 587, 698, 587, 523, 466, 0], bass: [110, 131, 147, 123], stepSec: 0.22 },
+    patrol: 2.0,
+    chase: 2.5,
+    theme: "dia",
     worldW: 3200,
     sky: ["#3a2b6b", "#6b52c9"],
     hill: "#3d7d55",
@@ -703,6 +715,10 @@ const LEVELS = [
 
   // ---------------- FASE 4 (difícil+, exige pulo duplo) ----------------
   makeLevel({
+    music: { melody: [349, 440, 523, 440, 392, 466, 587, 466, 349, 440, 523, 622, 523, 440, 392, 0], bass: [87, 110, 131, 98], stepSec: 0.17 },
+    patrol: 2.4,
+    chase: 3.0,
+    theme: "dia",
     worldW: 3400,
     sky: ["#243b6b", "#c86b8a"],
     hill: "#5a4a8a",
@@ -752,6 +768,10 @@ const LEVELS = [
 
   // ---------------- FASE 5 (final, plataformas móveis) ----------------
   makeLevel({
+    music: { melody: [294, 0, 349, 0, 392, 0, 466, 0, 392, 0, 349, 0, 294, 0, 349, 0], bass: [73, 0, 98, 0], stepSec: 0.24 },
+    patrol: 2.8,
+    chase: 3.4,
+    theme: "tarde",
     worldW: 3800,
     sky: ["#0e0b2a", "#3a1c5e"],
     hill: "#241a4a",
@@ -800,6 +820,10 @@ const LEVELS = [
 
   // ---------------- FASE 6 ("Os Túneis", desenhada à mão) ----------------
   makeLevel({
+    music: { melody: [392, 392, 523, 392, 440, 440, 587, 440, 392, 392, 659, 587, 523, 440, 392, 0], bass: [98, 98, 131, 110], stepSec: 0.15 },
+    patrol: 2.2,
+    chase: 2.8,
+    theme: "tarde",
     worldW: 4050,
     sky: ["#0b3a3a", "#177a6a"],
     hill: "#0f5c4e",
@@ -867,6 +891,10 @@ const LEVELS = [
 
   // Fase 7: travessia do aqueduto, combinando pulo duplo, dash e mergulho.
   makeLevel({
+    music: { melody: [523, 523, 659, 523, 698, 659, 784, 659, 523, 523, 659, 784, 880, 784, 659, 0], bass: [131, 131, 165, 175], stepSec: 0.14 },
+    patrol: 2.2,
+    chase: 2.8,
+    theme: "tarde",
     worldW: 3200, sky: ["#68446d", "#ffc794"], hill: "#526c76",
     start: { x: 60, y: GROUND_Y - PH }, goalX: 3070,
     checkpoints: [1000, 2170],
@@ -886,6 +914,10 @@ const LEVELS = [
 
   // ---------------- FASE 8 (fim do entardecer: todos os inimigos juntos) ----------------
   makeLevel({
+    music: { melody: [587, 587, 698, 587, 659, 659, 784, 659, 587, 587, 880, 784, 698, 587, 523, 0], bass: [147, 147, 175, 165], stepSec: 0.13 },
+    patrol: 2.3,
+    chase: 2.9,
+    theme: "tarde",
     worldW: 3600,
     sky: ["#402b1f", "#e08b3a"],
     hill: "#8a4a2a",
@@ -958,6 +990,10 @@ const LEVELS = [
 
   // ---------------- FASE 9 (entrada no mundo 2, penumbra) ----------------
   makeLevel({
+    music: { melody: [330, 392, 349, 330, 294, 330, 392, 349, 330, 294, 262, 294, 330, 294, 262, 0], bass: [82, 98, 87, 73], stepSec: 0.20 },
+    patrol: 2.6,
+    chase: 3.2,
+    theme: "noite",
     worldW: 2800,
     sky: ["#16233a", "#2c3d52"],
     hill: "#1c3326",
@@ -999,6 +1035,10 @@ const LEVELS = [
 
   // ---------------- FASE 10 (mata mais funda) ----------------
   makeLevel({
+    music: { melody: [294, 349, 330, 294, 262, 294, 349, 330, 294, 349, 392, 349, 294, 262, 233, 0], bass: [73, 87, 82, 65], stepSec: 0.18 },
+    patrol: 2.9,
+    chase: 3.5,
+    theme: "noite",
     worldW: 3200,
     sky: ["#0f1a2c", "#22303f"],
     hill: "#132a1e",
@@ -1048,6 +1088,10 @@ const LEVELS = [
 
   // ---------------- FASE 11 (difícil, plataformas móveis) ----------------
   makeLevel({
+    music: { melody: [349, 415, 392, 349, 330, 349, 415, 392, 349, 415, 466, 415, 392, 349, 311, 0], bass: [87, 104, 98, 78], stepSec: 0.17 },
+    patrol: 3.1,
+    chase: 3.8,
+    theme: "noite",
     worldW: 3500,
     sky: ["#0c1524", "#1c2c3a"],
     hill: "#0f2318",
@@ -1091,6 +1135,10 @@ const LEVELS = [
 
   // ---------------- FASE 12 ("O Bosque Fechado", atalho por túnel) ----------------
   makeLevel({
+    music: { melody: [311, 370, 349, 311, 277, 311, 370, 349, 311, 370, 415, 466, 415, 370, 311, 0], bass: [78, 93, 87, 69], stepSec: 0.16 },
+    patrol: 3.3,
+    chase: 4.0,
+    theme: "noite",
     worldW: 3600,
     sky: ["#0a1220", "#182534"],
     hill: "#0c1f14",
@@ -1139,6 +1187,10 @@ const LEVELS = [
 
   // ---------------- FASE 13 (difícil, plataformas móveis + gaps largos) ----------------
   makeLevel({
+    music: { melody: [370, 440, 415, 370, 330, 370, 440, 415, 370, 440, 494, 440, 415, 370, 330, 0], bass: [93, 110, 104, 82], stepSec: 0.15 },
+    patrol: 3.5,
+    chase: 4.2,
+    theme: "noite",
     worldW: 3900,
     sky: ["#080f1c", "#131f2c"],
     hill: "#0a1b12",
@@ -1186,6 +1238,10 @@ const LEVELS = [
 
   // ---------------- FASE 14 (corredor final antes da luta) ----------------
   makeLevel({
+    music: { melody: [330, 392, 370, 330, 311, 330, 392, 370, 330, 392, 440, 494, 466, 415, 349, 0], bass: [82, 98, 93, 78], stepSec: 0.14 },
+    patrol: 3.2,
+    chase: 3.8,
+    theme: "noite",
     worldW: 4100,
     sky: ["#05090f", "#0c1520"],
     hill: "#07140d",
@@ -1242,6 +1298,10 @@ const LEVELS = [
 
   // ---------------- FASE 15 (última travessia até a vila) ----------------
   makeLevel({
+    music: { melody: [392, 466, 440, 392, 349, 392, 466, 440, 392, 466, 523, 587, 523, 466, 392, 0], bass: [98, 117, 110, 87], stepSec: 0.13 },
+    patrol: 3.7,
+    chase: 4.4,
+    theme: "portao",
     worldW: 4200,
     sky: ["#020408", "#060d10"],
     hill: "#03120a",
@@ -1317,6 +1377,10 @@ const LEVELS = [
 
   // ---------------- FASE 16 (confronto final no portão) ----------------
   makeLevel({
+    music: { melody: [220, 220, 262, 220, 233, 233, 277, 233, 220, 220, 294, 277, 262, 233, 220, 0], bass: [55, 55, 65, 58], stepSec: 0.22 },
+    patrol: 3.2,
+    chase: 3.8,
+    theme: "portao",
     type: "fight",
     worldW: W,
     sky: ["#0a0f1e", "#241a3a"],
@@ -1346,6 +1410,7 @@ for (const lv of LEVELS) {
 const BONUS_LEVEL = makeLevel({
   id: BONUS_ID,
   type: "interlude",
+  theme: "interludio",
   worldW: 2360,
   sky: ["#111c2e", "#26334a"],
   hill: "#152b2c",
@@ -1443,28 +1508,7 @@ const ATTACKS = {
   kick: { duration: 28, impact: 18, reach: 64, damage: 2 },
 };
 
-/* Trilha sonora distinta por fase (melodia + baixo + duração do passo) */
-const LEVEL_MUSIC = [
-  { melody: [523, 659, 784, 659, 587, 698, 880, 698, 659, 784, 988, 784, 523, 440, 392, 0], bass: [131, 165, 196, 147], stepSec: 0.19 },
-  { melody: [392, 494, 587, 494, 440, 523, 659, 523, 392, 494, 587, 659, 587, 494, 440, 0], bass: [98, 131, 147, 110], stepSec: 0.16 },
-  { melody: [440, 523, 587, 523, 466, 554, 659, 554, 440, 523, 587, 698, 587, 523, 466, 0], bass: [110, 131, 147, 123], stepSec: 0.22 },
-  { melody: [349, 440, 523, 440, 392, 466, 587, 466, 349, 440, 523, 622, 523, 440, 392, 0], bass: [87, 110, 131, 98], stepSec: 0.17 },
-  { melody: [294, 0, 349, 0, 392, 0, 466, 0, 392, 0, 349, 0, 294, 0, 349, 0], bass: [73, 0, 98, 0], stepSec: 0.24 },
-  { melody: [392, 392, 523, 392, 440, 440, 587, 440, 392, 392, 659, 587, 523, 440, 392, 0], bass: [98, 98, 131, 110], stepSec: 0.15 },
-  { melody: [523, 523, 659, 523, 698, 659, 784, 659, 523, 523, 659, 784, 880, 784, 659, 0], bass: [131, 131, 165, 175], stepSec: 0.14 },
-  { melody: [587, 587, 698, 587, 659, 659, 784, 659, 587, 587, 880, 784, 698, 587, 523, 0], bass: [147, 147, 175, 165], stepSec: 0.13 },
-  // --- Mundo 2 (floresta escura, à noite) ---
-  { melody: [330, 392, 349, 330, 294, 330, 392, 349, 330, 294, 262, 294, 330, 294, 262, 0], bass: [82, 98, 87, 73], stepSec: 0.20 },
-  { melody: [294, 349, 330, 294, 262, 294, 349, 330, 294, 349, 392, 349, 294, 262, 233, 0], bass: [73, 87, 82, 65], stepSec: 0.18 },
-  { melody: [349, 415, 392, 349, 330, 349, 415, 392, 349, 415, 466, 415, 392, 349, 311, 0], bass: [87, 104, 98, 78], stepSec: 0.17 },
-  { melody: [311, 370, 349, 311, 277, 311, 370, 349, 311, 370, 415, 466, 415, 370, 311, 0], bass: [78, 93, 87, 69], stepSec: 0.16 },
-  { melody: [370, 440, 415, 370, 330, 370, 440, 415, 370, 440, 494, 440, 415, 370, 330, 0], bass: [93, 110, 104, 82], stepSec: 0.15 },
-  { melody: [330, 392, 370, 330, 311, 330, 392, 370, 330, 392, 440, 494, 466, 415, 349, 0], bass: [82, 98, 93, 78], stepSec: 0.14 },
-  // Etapa 15 (índice 14) e Etapa 16/confronto (índice 15) — trocadas de lugar
-  // diretamente aqui (antes, um hack trocava os dois índices após a definição).
-  { melody: [392, 466, 440, 392, 349, 392, 466, 440, 392, 466, 523, 587, 523, 466, 392, 0], bass: [98, 117, 110, 87], stepSec: 0.13 },
-  { melody: [220, 220, 262, 220, 233, 233, 277, 233, 220, 220, 294, 277, 262, 233, 220, 0], bass: [55, 55, 65, 58], stepSec: 0.22 },
-];
+
 
 const INTERLUDE_MUSIC = {
   // Espaçado: deixa o ouvido perceber cada pista antes da próxima.
@@ -1473,9 +1517,6 @@ const INTERLUDE_MUSIC = {
   stepSec: 0.30,
 };
 
-/* Velocidade dos inimigos cresce por fase */
-const PATROL_SPEED = [1.1, 1.5, 2.0, 2.4, 2.8, 2.2, 2.2, 2.3,  2.6, 2.9, 3.1, 3.3, 3.5, 3.2, 3.7, 3.2];
-const CHASE_SPEED  = [1.4, 1.9, 2.5, 3.0, 3.4, 2.8, 2.8, 2.9,  3.2, 3.5, 3.8, 4.0, 4.2, 3.8, 4.4, 3.8];
 const CHASE_RANGE  = 340;
 const ENEMY_W = 40, ENEMY_H = 38;
 const COIN_W = 22, COIN_H = 22;
@@ -1595,6 +1636,50 @@ const companion = {
   facing: 1,
   walkPhase: 0,
 };
+
+/* Reset do jogador + companheiro a um estado limpo, num ponto dado (S2 da
+   auditoria: antes eram ~6 cópias manuais que já divergiam — esta é a fonte
+   única, usada por loadLevel/loseLife/respawn por queda/arena). y é o topo da
+   caixa no tamanho Betinho (PH). A semântica de tentativa (moedas/checkpoints
+   mantidos vs. zerados) NÃO é tocada aqui: quem chama decide (loseLife mantém;
+   Game Over/novo load zera). */
+function resetPlayerTo(x, y, opts = {}) {
+  player.x = x;
+  player.y = y;
+  player.vx = 0; player.vy = 0;
+  player.onGround = !!opts.onGround;
+  player.facing = 1;
+  player.form = "betinho";
+  player.leader = "betinho";
+  player.w = FORM.betinho.w;
+  player.h = FORM.betinho.h;
+  player.pendingRevert = false;
+  player.dashT = 0; player.dashCooldown = 0; player.pounding = false; player.landingSquashT = 0;
+  player.attackT = 0; player.attackType = null;
+  player.coyote = 0; player.jumps = 0; player.jumpBuffer = 0;
+  player.starT = 0; player.speedBoostT = 0; player.hasFeather = false;
+  if (!opts.keepInvuln) player.invuln = opts.invuln || 0;
+  tunnelAnim = null; playerVisualScaleY = 1;
+  if (opts.repositionCompanion !== false) {
+    companion.form = "quindim";
+    companion.w = FORM.quindim.w;
+    companion.h = FORM.quindim.h;
+    companion.x = player.x - 46;
+    companion.y = player.y + player.h - companion.h;
+    companion.facing = 1;
+  }
+}
+
+/* Checkpoint — semântica única (S3). Tocar um checkpoint à frente redefine o
+   marco de retorno da tentativa (uma vez por checkpoint). Perder vida volta ao
+   marco mantendo moedas/checkpoints; Game Over ou reinício da Etapa zera a
+   tentativa via loadLevel; no interlúdio, cada pista vira um marco (silencioso:
+   o som da própria pista já toca). */
+function armCheckpoint(cp, silent = false) {
+  cp.on = true;
+  respawn = { x: cp.x - PW / 2, y: GROUND_Y - PH };
+  if (!silent) Sound.checkpoint();
+}
 
 let enemies = [];   // instâncias da fase atual
 let checkpoints = []; // {x, y, on} da fase atual
@@ -1730,29 +1815,9 @@ function loadLevel(i) {
   chapterIntroT = 0;
   hitFreeze = 0; screenShake = 0;
   Sound.stopMusic();
-  const music = bonusActive ? INTERLUDE_MUSIC : LEVEL_MUSIC[i];
+  const music = bonusActive ? INTERLUDE_MUSIC : currentLevel().music;
   if (music) Sound.startMusic(music.melody, music.bass, music.stepSec);
-  player.x = lv.start.x;
-  player.y = lv.start.y;
-  player.vx = 0; player.vy = 0;
-  player.onGround = false;
-  player.jumps = 0; player.coyote = 0; player.jumpBuffer = 0;
-  player.facing = 1;
-  player.invuln = 0;
-  player.form = "betinho";
-  player.leader = "betinho";
-  player.w = FORM.betinho.w;
-  player.h = FORM.betinho.h;
-  player.pendingRevert = false;
-  player.dashT = 0; player.dashCooldown = 0; player.pounding = false; player.landingSquashT = 0;
-  player.attackT = 0; player.attackType = null;
-  player.starT = 0; player.speedBoostT = 0; player.hasFeather = false;
-  companion.form = "quindim";
-  companion.w = FORM.quindim.w;
-  companion.h = FORM.quindim.h;
-  companion.x = player.x - 46;
-  companion.y = lv.start.y + PH - companion.h;
-  companion.facing = 1;
+  resetPlayerTo(lv.start.x, lv.start.y, { invuln: 0 });
   cameraX = 0;
   toastMsg = null; toastT = 0;
   tunnelAnim = null; playerVisualScaleY = 1; tunnelDenyCooldown = 0;
@@ -1893,24 +1958,9 @@ function loseLife() {
     fadeOut(() => { state = STATE.GAMEOVER; Sound.stopMusic(); Sound.gameover(); });
   } else {
     const lv = currentLevel();
-    player.x = respawn.x;      // último checkpoint (ou início)
-    player.y = respawn.y;
-    player.vx = 0; player.vy = 0;
-    player.form = "betinho";
-    player.leader = "betinho";
-    player.w = FORM.betinho.w;
-    player.h = FORM.betinho.h;
-    player.pendingRevert = false;
-    player.dashT = 0; player.dashCooldown = 0; player.pounding = false; player.landingSquashT = 0;
-    player.attackT = 0; player.attackType = null;
-    player.starT = 0; player.speedBoostT = 0; player.hasFeather = false;
-    tunnelAnim = null; playerVisualScaleY = 1;
-    player.invuln = 100;
-    companion.form = "quindim";
-    companion.w = FORM.quindim.w;
-    companion.h = FORM.quindim.h;
-    companion.x = player.x - 46;
-    companion.y = player.y + player.h - companion.h;
+    // Volta ao marco da tentativa (checkpoint ou início), mantendo moedas e
+    // checkpoints já ativados — semântica definida em resetPlayerTo/armCheckpoint.
+    resetPlayerTo(respawn.x, respawn.y, { invuln: 100 });
     for (const q of exchangePoints) { q.cooldown = 0; q.armed = true; }
     if (bonusActive && interlude) {
       // A pista atual continua encontrada; o respawn já é o último marco.
@@ -2165,12 +2215,7 @@ function updatePlayingCore() {
   // --- Caiu no buraco ---
   if (player.y > H + 80) {
     if (assist.noFallDeath) {
-      player.x = respawn.x; player.y = respawn.y;
-      player.vx = 0; player.vy = 0;
-      player.form = "betinho"; player.leader = "betinho"; player.w = FORM.betinho.w; player.h = FORM.betinho.h;
-      player.pendingRevert = false; player.dashT = 0; player.dashCooldown = 0;
-      player.pounding = false; player.landingSquashT = 0;
-      player.invuln = 60;
+      resetPlayerTo(respawn.x, respawn.y, { invuln: 60 });
       cameraX = Math.max(0, Math.min(respawn.x + PW / 2 - W / 2, lv.worldW - W));
       Sound.hurt();
     } else {
@@ -2198,8 +2243,8 @@ function updatePlayingCore() {
   if (tunnelAnim) return; // transição começou agora mesmo
 
   // --- Inimigos ---
-  const pSpeed = PATROL_SPEED[levelIndex];
-  const cSpeed = CHASE_SPEED[levelIndex];
+  const pSpeed = lv.patrol;
+  const cSpeed = lv.chase;
   const pCenter = player.x + player.w / 2;
 
   for (const en of enemies) {
@@ -2287,11 +2332,7 @@ function updatePlayingCore() {
 
   // --- Checkpoints ---
   for (const cp of checkpoints) {
-    if (!cp.on && player.x + player.w / 2 >= cp.x) {
-      cp.on = true;
-      respawn = { x: cp.x - PW / 2, y: GROUND_Y - PH };
-      Sound.checkpoint();
-    }
+    if (!cp.on && player.x + player.w / 2 >= cp.x) armCheckpoint(cp);
   }
 
   // --- Moedas ---
@@ -2421,8 +2462,9 @@ function updateInterlude() {
   if (clue && aabb(player, clue)) {
     clue.found = true;
     interlude.clueIndex++;
+    // Cada pista vira um marco de retorno (silencioso: o som da pista já toca).
     const cp = checkpoints[Math.min(interlude.clueIndex - 1, checkpoints.length - 1)];
-    if (cp) { cp.on = true; respawn = { x: cp.x - PW / 2, y: GROUND_Y - PH }; }
+    if (cp) armCheckpoint(cp, true);
     Sound.clue(clue.kind);
     toast(clue.kind === "pegada" ? "Uma pegada" : clue.kind === "tufo" ? "Um tufo dourado" : "Um latido!", 110);
     if (interlude.clueIndex >= interlude.clues.length) {
@@ -2465,10 +2507,10 @@ function getFightCrowd() {
 }
 
 function initFight() {
-  player.x = 120; player.y = GROUND_Y - player.h;
-  player.vx = 0; player.vy = 0; player.onGround = true; player.facing = 1;
-  player.dashT = 0; player.dashCooldown = 0; player.pounding = false; player.landingSquashT = 0;
-  player.attackT = 0; player.attackType = null;
+  // resetPlayerTo posiciona no canto do ringue (mesmo lugar do lv.start); a
+  // arena mantém a invulnerabilidade e não reposiciona o companheiro (o ringue
+  // usa fight.quindim).
+  resetPlayerTo(120, GROUND_Y - player.h, { onGround: true, keepInvuln: true, repositionCompanion: false });
   const bossCfg = currentLevel().boss || { name: "BOXEADOR", color: "#c62828", colorHot: "#ff6b6b" };
   fight = {
     round: 1, wins: 0,
@@ -2494,9 +2536,7 @@ function resetRoundHP() {
   fight.timer = FIGHT_TIME;
   fight.boss.x = W - 200; fight.boss.y = GROUND_Y - BOSS_H;
   fight.boss.state = "approach"; fight.boss.stateT = 0; fight.boss.doubleDmg = false; fight.boss.glove = 0; fight.boss.stompCooldown = 0;
-  player.x = 120; player.y = GROUND_Y - player.h; player.vx = 0; player.vy = 0;
-  player.dashT = 0; player.dashCooldown = 0; player.pounding = false; player.landingSquashT = 0;
-  player.attackT = 0; player.attackType = null;
+  resetPlayerTo(120, GROUND_Y - player.h, { onGround: true, keepInvuln: true, repositionCompanion: false });
 }
 
 function endRound(playerWon) {
@@ -2713,19 +2753,25 @@ function updateFight() {
 /* ============================================================
    DESENHO
    ============================================================ */
+/* Paleta por tema do capítulo (S1): cada fase declara theme no seu config; o
+   desenho não depende mais da posição da fase no array (levelIndex). night e
+   village são propriedades do tema, não do índice. */
+const THEMES = {
+  dia:        { sky: ["#5c9cac", "#f5d69c"], far: "#729394", near: "#426d69", ground: "#72534b", grass: "#a6bb79", brick: "#81998b", night: false, village: false },
+  tarde:      { sky: ["#665273", "#efb07e"], far: "#887581", near: "#475b68", ground: "#67505b", grass: "#d1a66f", brick: "#9c807b", night: false, village: false },
+  noite:      { sky: ["#132e43", "#4f7381"], far: "#355565", near: "#203f4a", ground: "#374c53", grass: "#75a896", brick: "#5f7f83", night: true, village: false },
+  portao:     { sky: ["#1b2947", "#b68486"], far: "#635f79", near: "#344654", ground: "#4e505c", grass: "#d2b07d", brick: "#7d8791", night: true, village: true },
+  interludio: { sky: ["#111c2e", "#26334a"], far: "#1d3541", near: "#172c32", ground: "#3a3848", grass: "#7f9a78", brick: "#5a6571", night: true, village: false },
+};
 function sceneryPalette() {
-  if (bonusActive) return { sky: ["#111c2e", "#26334a"], far: "#1d3541", near: "#172c32", ground: "#3a3848", grass: "#7f9a78", brick: "#5a6571" };
-  if (levelIndex < 4) return { sky: ["#5c9cac", "#f5d69c"], far: "#729394", near: "#426d69", ground: "#72534b", grass: "#a6bb79", brick: "#81998b" };
-  if (levelIndex < 8) return { sky: ["#665273", "#efb07e"], far: "#887581", near: "#475b68", ground: "#67505b", grass: "#d1a66f", brick: "#9c807b" };
-  if (levelIndex < 14) return { sky: ["#132e43", "#4f7381"], far: "#355565", near: "#203f4a", ground: "#374c53", grass: "#75a896", brick: "#5f7f83" };
-  return { sky: ["#1b2947", "#b68486"], far: "#635f79", near: "#344654", ground: "#4e505c", grass: "#d2b07d", brick: "#7d8791" };
+  return THEMES[currentLevel().theme] || THEMES.dia;
 }
 function drawBackground(lv) {
   const theme = sceneryPalette();
   const g = ctx.createLinearGradient(0, 0, 0, H);
   g.addColorStop(0, theme.sky[0]); g.addColorStop(1, theme.sky[1]);
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-  const night = bonusActive || levelIndex >= 8;
+  const night = theme.night;
   ctx.fillStyle = night ? "#f7e3b2" : "#ffe6aa";
   ctx.beginPath(); ctx.arc(760 - cameraX * .035, 134, night ? 29 : 48, 0, Math.PI * 2); ctx.fill();
   if (night) {
@@ -2754,7 +2800,7 @@ function drawBackground(lv) {
       ctx.beginPath(); ctx.moveTo(x,top-45+j*35); ctx.lineTo(x-36-j*7,top+40+j*35); ctx.lineTo(x+36+j*7,top+40+j*35); ctx.fill();
     }
   }
-  if (levelIndex >= 14) for (let i = 0; i < 5; i++) drawHome(100+i*230-cameraX*.12,340+(i%2)*20,.55);
+  if (theme.village) for (let i = 0; i < 5; i++) drawHome(100+i*230-cameraX*.12,340+(i%2)*20,.55);
   if (night) {
     ctx.fillStyle = "#e9d999";
     for (let i = 0; i < 16; i++) { const x = ((i*193-cameraX*.6)%W+W)%W; const y=310+(i*37)%120; ctx.fillRect(x,y,3,3); }

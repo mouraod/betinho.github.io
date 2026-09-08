@@ -482,7 +482,19 @@ conjunto de verbos.
 - **M4 — despacho central de modos** ✔ (`MODES` + `modeKeyOf`/`chapterMode`/
   `modeInfo()`; `updatePlaying`/`drawWorld`/`loadLevel`/entrada/guia/UI consultam o
   registro; suíte `tests/mode-dispatch.test.cjs`).
-- Pendente (auditoria): S1 (dobrar velocidades/música/paleta por fase no config da
-  fase), S2 (reset único do jogador), S3 (semântica de checkpoint numa função),
-  S4 (passada de design das mecânicas subutilizadas) — e o modo corrida em si,
-  que agora é uma linha em `MODES` + sua lógica.
+- **S1 — metadados por fase no config** ✔ (música, `patrol`/`chase` e `theme`
+  agora vivem no `makeLevel` de cada fase; arrays paralelos `LEVEL_MUSIC`/
+  `PATROL_SPEED`/`CHASE_SPEED` e as faixas de `levelIndex` em `sceneryPalette`
+  foram removidos; `THEMES` carrega night/village por tema; suíte
+  `tests/level-config.test.cjs`).
+- **S2 — reset único do jogador** ✔ (`resetPlayerTo(x, y, opts)` substitui as
+  cópias de loadLevel/loseLife/respawn por queda/arena; suíte
+  `tests/reset-checkpoint.test.cjs`).
+- **S3 — semântica única de checkpoint** ✔ (`armCheckpoint(cp, silent)`;
+  tentativa: perder vida mantém moedas/checkpoints, Game Over zera via loadLevel;
+  pista do interlúdio vira marco silencioso).
+- **S4 — passada de design** ✔ (documento `docs/design/mecanicas-subutilizadas.md`
+  com identidade da Estrela, aposta da troca de líder, torções de túnel/dash/
+  mergulho/mover e regra de produção por lição).
+- Pendente: o modo corrida em si — agora é uma linha em `MODES` + sua lógica, e
+  cada fase nova já herda música/velocidade/tema do próprio config.

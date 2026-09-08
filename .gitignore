@@ -1,0 +1,4 @@
+# Arquivos locais que não devem subir para o repositório público.
+.DS_Store
+.claude/
+docs/adr/

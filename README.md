@@ -44,8 +44,8 @@ Decisões definidas com Davi:
 
 ## Verificação e arquivos
 
-Execute `node --test tests/input.test.cjs`. A suíte cobre entradas, pausa, confirmação, progressão nas 16 fases, dano real dos golpes, separação dos botões, travessia dos novos vãos e encerramento do chefe. Os vãos são simulados sem inimigos para verificar a geometria separadamente do combate. Os testes não substituem uma partida completa nem testes com controle físico.
+Execute `node --test tests/`. As suítes cobrem entradas, pausa, confirmação, progressão nas 16 fases, dano real dos golpes, separação dos botões, travessia dos novos vãos e encerramento do chefe. Os vãos são simulados sem inimigos para verificar a geometria separadamente do combate. Os testes não substituem uma partida completa nem testes com controle físico.
 
 `game.js` contém simulação, capítulos e renderização. `ui.js` integra o menu HTML com os estados do jogo. `style.css` cuida da moldura e da pausa. Para abrir uma Etapa no desenvolvimento, use `?fase=N` (1 a 16); use `?fase=bonus` para abrir O rastro de Quindim. O replay do Interlúdio aparece no título depois da primeira conclusão e fica salvo em `localStorage`.
 
-Os termos canônicos ficam em [CONTEXT.md](CONTEXT.md) e a decisão estrutural dos personagens em [docs/adr/0001-personagens-distintos-e-pontos-de-troca.md](docs/adr/0001-personagens-distintos-e-pontos-de-troca.md).
+Os termos canônicos ficam em [CONTEXT.md](CONTEXT.md), a auditoria técnica em [docs/audit.md](docs/audit.md) e a passada de design das mecânicas em [docs/design/mecanicas-subutilizadas.md](docs/design/mecanicas-subutilizadas.md).
